@@ -24,13 +24,10 @@ Do **not** use this skill when the host agent's native tools already cover the r
 1. `grok` on PATH. Install if missing:
    - macOS / Linux / WSL: `curl -fsSL https://x.ai/cli/install.sh | bash`
    - Windows PowerShell: `irm https://x.ai/cli/install.ps1 | iex`
-2. Authentication, in priority order:
-   - `XAI_API_KEY` env var (preferred for non-interactive use), or
-   - `GROK_CODE_XAI_API_KEY` for ACP mode, or
-   - A cached token from a previous `grok login`.
+2. **User must be logged in via `grok login`** — this is the canonical auth path. It caches a token in `~/.grok/` so all subsequent headless calls work without further prompts. **This skill assumes `grok login` has already been run; it does not use `XAI_API_KEY`.**
 3. Verify before doing real work: `grok inspect` (lists discovered config, skills, plugins, MCPs).
 
-If no API key is set and no cached token exists, **stop and ask the user** — `grok` will try to open a browser, which will hang in a headless context.
+If no cached token exists, **stop and ask the user to run `grok login` once interactively** — otherwise `grok` will try to open a browser and hang in a headless context.
 
 ## Headless usage (the main entry point)
 
@@ -56,13 +53,14 @@ grok -p "Your prompt here"
 ### Recommended invocation pattern from another agent
 
 ```bash
-XAI_API_KEY="$XAI_API_KEY" \
 grok -p "$PROMPT" \
   --cwd "$REPO_ROOT" \
   --model grok-build-0.1 \
   --output-format json \
   --always-approve
 ```
+
+(Auth comes from the cached `grok login` token in `~/.grok/`. No env vars required.)
 
 Parse the final JSON object for the assistant text + tool-call summary. For long tasks, switch to `streaming-json` and consume newline-delimited events live.
 
@@ -141,7 +139,7 @@ If the host agent wants Grok as a long-lived sub-agent rather than one-shot prom
 grok agent stdio
 ```
 
-This speaks JSON-RPC over stdin/stdout. Initialize with `initialize`, authenticate (`xai.api_key` if `GROK_CODE_XAI_API_KEY` is set, otherwise `cached_token`), open a session with `session/new`, and send `session/prompt`. Assistant text streams back as `session/update` events with `sessionUpdate == "agent_message_chunk"`. The final `session/prompt` response carries `stopReason`. See xAI docs for the full Node example: https://docs.x.ai/build/cli/headless-scripting
+This speaks JSON-RPC over stdin/stdout. Initialize with `initialize`, authenticate with `cached_token` (the token from `grok login`), open a session with `session/new`, and send `session/prompt`. Assistant text streams back as `session/update` events with `sessionUpdate == "agent_message_chunk"`. The final `session/prompt` response carries `stopReason`. See xAI docs for the full Node example: https://docs.x.ai/build/cli/headless-scripting
 
 Prefer plain headless (`grok -p`) unless the host genuinely needs persistent bidirectional state — ACP adds a lot of plumbing.
 
@@ -177,7 +175,7 @@ default = "my-model"
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| `grok` hangs on first run | Trying to open a browser for auth. | Set `XAI_API_KEY` and re-run, or have the user run `grok login` once interactively. |
+| `grok` hangs on first run | No cached token — trying to open a browser for auth. | Have the user run `grok login` once interactively, then retry. |
 | Permission prompts in headless | `approval_mode = "ask"` (default). | Add `--always-approve`, or set `[ui] approval_mode = "always-approve"` in `~/.grok/config.toml`. |
 | `@file` not found | `--cwd` not set / wrong path. | Pass `--cwd` to the project root explicitly. |
 | Empty or truncated output | Used `plain` for a long streaming task. | Switch to `streaming-json` and consume events. |

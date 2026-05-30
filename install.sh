@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-REPO_RAW="${GROK_BUILD_SKILL_RAW:-https://raw.githubusercontent.com/REPLACE_ME/grok-build-skill/main}"
+REPO_RAW="${GROK_BUILD_SKILL_RAW:-https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main}"
 SKILL_PATH="skills/grok-build/SKILL.md"
 
 cyan()  { printf "\033[36m%s\033[0m\n" "$1"; }

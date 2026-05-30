@@ -19,7 +19,7 @@ The skill covers every flag, every slash command, every output format, and the c
 
 ```bash
 mkdir -p ~/.claude/skills/grok-build
-curl -fsSL https://raw.githubusercontent.com/<YOUR_USER>/<YOUR_REPO>/main/skills/grok-build/SKILL.md \
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/skills/grok-build/SKILL.md \
   -o ~/.claude/skills/grok-build/SKILL.md
 ```
 
@@ -31,7 +31,7 @@ Grok auto-discovers skills from `~/.claude/skills/` and `~/.grok/skills/` — in
 
 ```bash
 mkdir -p ~/.grok/skills/grok-build
-curl -fsSL https://raw.githubusercontent.com/<YOUR_USER>/<YOUR_REPO>/main/skills/grok-build/SKILL.md \
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/skills/grok-build/SKILL.md \
   -o ~/.grok/skills/grok-build/SKILL.md
 ```
 
@@ -41,7 +41,7 @@ Codex doesn't have the same skill-discovery system; it reads `AGENTS.md`. Append
 
 ```bash
 mkdir -p ~/.codex
-curl -fsSL https://raw.githubusercontent.com/<YOUR_USER>/<YOUR_REPO>/main/skills/grok-build/SKILL.md \
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/skills/grok-build/SKILL.md \
   >> ~/.codex/AGENTS.md
 ```
 
@@ -50,7 +50,7 @@ Or, per project, copy it as `AGENTS.md` in your repo root.
 ### One-shot installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<YOUR_USER>/<YOUR_REPO>/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 ```
 
 The script detects which agents you have installed and writes the skill in the right place(s).
@@ -74,7 +74,9 @@ See [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) for the full re
 1. The `grok` binary on `PATH`:
    - macOS / Linux / WSL: `curl -fsSL https://x.ai/cli/install.sh | bash`
    - Windows PowerShell: `irm https://x.ai/cli/install.ps1 | iex`
-2. An xAI API key in `XAI_API_KEY` (or a cached token from `grok login`).
+2. **Logged in via `grok login`** (one-time interactive step — the token gets cached in `~/.grok/`).
+
+> No `XAI_API_KEY` needed. This skill is designed around the `grok login` flow, not direct API key usage.
 
 ## Compatibility
 
