@@ -47,13 +47,23 @@ curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/s
 
 Or, per project, copy it as `AGENTS.md` in your repo root.
 
-### One-shot installer
+### One-shot installer (recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 ```
 
-The script detects which agents you have installed and writes the skill in the right place(s).
+The script detects which agents you have installed (Claude Code, Grok, Codex) and writes the skill in the right place(s).
+
+**Re-running is safe** — `install.sh` is idempotent: it overwrites the Claude Code & Grok files and replaces the marked block inside Codex's `AGENTS.md` in place, so updating to a new version is just running the same one-liner again.
+
+**To uninstall**, run the script with `--uninstall`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash -s -- --uninstall
+```
+
+That removes the skill from all detected agents and restores the original `AGENTS.md` for Codex (anything outside the `BEGIN / END grok-build skill` markers is preserved).
 
 ## What the skill teaches the agent
 
