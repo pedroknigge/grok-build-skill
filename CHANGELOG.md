@@ -1,5 +1,45 @@
 # Changelog
 
+## v2.3 — 2026-06-15
+
+### Noise, hook spam, and long-running delegation robustness (second round of real Codex feedback)
+- Added a full new subsection **"Reducing environment noise, hook spam, and extracting only the final report"** right after the main recommended pattern.
+- Documented the exact problem reported: even with `--output-format json`, the delegated `grok` process emits large volumes of hook traces ("hooks fallidos del entorno Grok"), plugin/MCP warnings, permission banners, and environment diagnostics. These accumulate over minutes on broad tasks (e.g. full-project error audits), making the caller think the process is stuck or hanging.
+- Practical, copy-pasteable mitigations that directly address the trace:
+  - `2>/dev/null` (most spam is on stderr)
+  - `| jq -s 'last'` to reliably extract only the final report object even if the stream is chatty
+  - Streaming-json + `jq` filter + `tail -1` for very long runs
+  - Extremely strict instructions *inside the prompt* the delegated grok receives ("emit NOTHING except the exact final structured report at the very end")
+  - Aggressive `--tools` allowlist + `--disallowed-tools` for read-only audits to reduce hook firings
+  - Caller-side: `--max-turns`, `timeout`, capture-to-file + extract, or kill the process once the final JSON has been seen (exactly the strategy "limitaré la extracción al reporte final disponible o cortaré el proceso para no dejarlo colgado")
+- Updated the recommended pattern for heavy/long work to include the above.
+- Added a new dedicated row in the Failure modes table for this symptom, with pointer back to the noise-reduction section.
+- Enhanced the Quick reference card with:
+  - A noise-filtered streaming example
+  - A complete "heavy repo audit" example using the new techniques
+- Minor cleanups to surrounding advice (JSON preference, long-running notes).
+- This iteration makes the skill much more reliable when Codex (or similar agents) are asked to "delegar el análisis a Grok" via the skill.
+
+Additional lessons captured from the full trace:
+- The delegated process eventually terminated and produced a *useful* report, but only after many minutes of repeated hook warnings. The caller (Codex) wisely ran parallel local verification (`npm run typecheck` / `lint` / `test` / `check:schema`) instead of blocking.
+- Even after receiving the report, the host still had to manually cross-check specific `file:line` claims against the real source and re-run builds to distinguish real bugs from inferences or "ruido del reporte".
+- Added an "After you receive the report (verification is your job)" subsection + a complete, battle-tested "read-only auditor" prompt template (in Spanish/English adaptable) that matches the style that actually worked in the reported session.
+- Documented the hybrid pattern that emerged: fire fast local checks in parallel + delegate to grok with strict constraints + extract final JSON defensively + always validate grok's findings with local tools and project commands.
+
+## v2.2 — 2026-06-15
+
+### Model discovery & robustness (real-world feedback from Codex usage)
+- **Root cause from production use:** Codex (and similar agents) copy-pasted the "recommended invocation" example which hard-coded `--model grok-build-0.1`. In the user's environment the CLI only exposed the model as `grok-build` (listed via `grok models`). The first delegation attempt failed before any work started.
+- **Fix:** 
+  - Changed primary examples and guidance throughout `SKILL.md` to use `grok-build` as the documented coding model.
+  - Added prominent **"Discovering the exact model name first"** section + pre-flight commands (`grok models`, `grok inspect`, `grok --version`, `git status`).
+  - Added a small robust discovery one-liner for scripts/other agents:
+    `MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)`
+  - Updated the flags table, recommended pattern block, coding agent examples, custom models section, failure modes table, and Quick reference card.
+  - Kept `grok-build-0.1` only as a historical example in explanations and as a trigger word for skill activation (backward compatibility).
+- Also lightly updated README.md table and bullet to reflect the discovery requirement.
+- This directly addresses the trace the user shared where Codex had to manually run `grok models` and re-launch.
+
 ## v2.1 — 2026-06-15
 
 ### Major content updates (SKILL.md + README)

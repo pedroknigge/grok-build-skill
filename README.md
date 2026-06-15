@@ -7,7 +7,7 @@ Once installed, the host agent learns:
 **CLI delegation patterns**
 - Generate images: `grok -p "/imagine ..." --always-approve`
 - Generate videos via the CLI
-- Delegate coding / refactoring to `grok-build-0.1` with proper `@file` + `--cwd`
+- Delegate coding / refactoring to `grok-build` (run `grok models` to discover exact ID) with proper `@file` + `--cwd`
 - Streaming NDJSON, named sessions, JSON output, ACP
 
 **Plus clear guidance on modern native alternatives** when the host *is* a capable Grok (spawn_subagent, todo_write, enter_plan_mode, direct `image_gen` tools, proper MCP usage, background monitoring, etc.).
@@ -74,7 +74,7 @@ That removes the skill from all detected agents and restores the original `AGENT
 | Repo Q&A / coding tasks     | `grok -p "@src/ Explain..." --cwd "$REPO" --output-format json` | Direct tools + `spawn_subagent` + `todo_write` |
 | Targeted refactor           | `grok -p "@src/utils/... Refactor..." --always-approve`     | `search_replace` + subagents or plan mode |
 | Multi-turn / long work      | Named sessions (`-s` / `-r`) + streaming-json               | `spawn_subagent`, background tasks + `monitor`, scheduler |
-| Ambiguous architecture      | Multi-turn planning prompt to grok-build-0.1                | `enter_plan_mode` → design → `exit_plan_mode` |
+| Ambiguous architecture      | Multi-turn planning prompt to grok-build (use `grok models` first) | `enter_plan_mode` → design → `exit_plan_mode` |
 | Integrations (GitHub, deploys, browser, designs) | Delegate via CLI prompt                                     | `search_tool` + `use_tool` (MCP) |
 | Progress visibility         | Parse JSON / NDJSON                                         | `todo_write` (live task list) |
 
