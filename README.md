@@ -1,17 +1,18 @@
 # grok-build skill
 
-A drop-in **skill** that teaches Claude Code, Grok Build, Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, and ACP.
+A drop-in **skill** that teaches Claude Code, Grok Build, Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, ACP, **and when to prefer native Grok tools** (direct image/video generation, subagents, plan mode, MCPs via `search_tool`+`use_tool`, todo tracking, etc.) instead of shelling out.
 
-Once installed, your agent can:
+Once installed, the host agent learns:
 
+**CLI delegation patterns**
 - Generate images: `grok -p "/imagine ..." --always-approve`
-- Generate videos: `grok -p "/imagine-video ..." --always-approve`
-- Delegate coding tasks to `grok-build-0.1` with `@file` references
-- Stream NDJSON output for live progress
-- Resume named sessions across calls
-- Speak the Agent Client Protocol (ACP) for long-lived sub-agents
+- Generate videos via the CLI
+- Delegate coding / refactoring to `grok-build-0.1` with proper `@file` + `--cwd`
+- Streaming NDJSON, named sessions, JSON output, ACP
 
-The skill covers every flag, every slash command, every output format, and the common failure modes (auth hangs, permission prompts, `@file` resolution, etc.) so the host agent doesn't have to guess.
+**Plus clear guidance on modern native alternatives** when the host *is* a capable Grok (spawn_subagent, todo_write, enter_plan_mode, direct `image_gen` tools, proper MCP usage, background monitoring, etc.).
+
+The skill is kept current with flags, permission models, MCP patterns, and agent orchestration primitives.
 
 ## Quick install
 
@@ -67,26 +68,26 @@ That removes the skill from all detected agents and restores the original `AGENT
 
 ## What the skill teaches the agent
 
-| Capability | Example |
-| --- | --- |
-| Image generation | `grok -p "/imagine a neon Tokyo alley, 35mm" --always-approve` |
-| Video generation | `grok -p "/imagine-video a hummingbird hovering on a hibiscus, 4s" --always-approve` |
-| Repo-level Q&A | `grok -p "@src/ Explain the architecture." --cwd "$REPO" --output-format json` |
-| Targeted refactor | `grok -p "@src/utils/date.ts Refactor to handle null inputs." --always-approve` |
-| Multi-turn session | `grok -s feat-X -p "Plan it" ... && grok -r feat-X -p "Now build it"` |
-| Streaming NDJSON | `grok -p "..." --output-format streaming-json \| jq -r '.content.text'` |
-| ACP sub-agent | `grok agent stdio` with JSON-RPC `initialize` / `session/new` / `session/prompt` |
+| Capability                  | CLI Delegation Example                                      | Native Grok Alternative (when available) |
+|-----------------------------|-------------------------------------------------------------|------------------------------------------|
+| Image / video generation    | `grok -p "/imagine a neon Tokyo alley, 35mm" --always-approve` | `image_gen`, `image_to_video`, `image_edit`, `reference_to_video` |
+| Repo Q&A / coding tasks     | `grok -p "@src/ Explain..." --cwd "$REPO" --output-format json` | Direct tools + `spawn_subagent` + `todo_write` |
+| Targeted refactor           | `grok -p "@src/utils/... Refactor..." --always-approve`     | `search_replace` + subagents or plan mode |
+| Multi-turn / long work      | Named sessions (`-s` / `-r`) + streaming-json               | `spawn_subagent`, background tasks + `monitor`, scheduler |
+| Ambiguous architecture      | Multi-turn planning prompt to grok-build-0.1                | `enter_plan_mode` → design → `exit_plan_mode` |
+| Integrations (GitHub, deploys, browser, designs) | Delegate via CLI prompt                                     | `search_tool` + `use_tool` (MCP) |
+| Progress visibility         | Parse JSON / NDJSON                                         | `todo_write` (live task list) |
 
-See [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) for the full reference.
+See [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) for the complete reference (including the important "Native Grok vs CLI" decision guide).
 
 ## Prerequisites
 
-1. The `grok` binary on `PATH`:
-   - macOS / Linux / WSL: `curl -fsSL https://x.ai/cli/install.sh | bash`
-   - Windows PowerShell: `irm https://x.ai/cli/install.ps1 | iex`
-2. **Logged in via `grok login`** (one-time interactive step — the token gets cached in `~/.grok/`).
+- `grok` binary already on `PATH`
+- User has run `grok login` at least once (cached token — this is the only supported auth mode)
 
-> No `XAI_API_KEY` needed. This skill is designed around the `grok login` flow, not direct API key usage.
+**Warning:** This skill only works with the `grok login` cached token flow. It does **not** support `XAI_API_KEY` direct API usage. A clear warning is included in the skill itself.
+
+Before heavy delegation, `grok inspect` is recommended to verify the environment.
 
 ## Compatibility
 
@@ -103,11 +104,26 @@ MIT — see [`LICENSE`](./LICENSE).
 
 ## Contributing
 
-PRs welcome. The skill is meant to stay short and current with xAI's docs at [docs.x.ai/build](https://docs.x.ai/build/overview). If xAI ships a new slash command, output format, or flag, open a PR updating `skills/grok-build/SKILL.md` and the cheatsheet section in this README.
+PRs are very welcome. The goal is to keep the skill **short, accurate, and high-signal** while reflecting the latest Grok Build capabilities (new headless flags, MCP usage patterns with `search_tool`+`use_tool`, subagents, plan mode, direct image tools, background/monitoring, permissions model, richer skill frontmatter, etc.).
+
+When updating:
+- Edit the authoritative content in `skills/grok-build/SKILL.md`
+- Keep the "Native Grok vs CLI delegation" guidance honest
+- Update the quick reference and tables in README
+- Bump version in frontmatter + add entry to CHANGELOG.md
+- Test that the one-liner installer still works
+
+See the local `~/.grok/docs/user-guide/` files (especially 07-mcp-servers, 08-skills, 14-headless, 16-subagents, 19-plan-mode, 20-background-tasks, 22-permissions) for the current truth.
 
 ## Sources
 
+Official:
 - [Grok Build — Getting Started](https://docs.x.ai/build/overview)
-- [Skills, Plugins & Marketplaces](https://docs.x.ai/build/features/skills-plugins-marketplaces)
-- [Modes and Commands](https://docs.x.ai/build/modes-and-commands)
 - [Headless & Scripting](https://docs.x.ai/build/cli/headless-scripting)
+
+For the current Grok environment also consult the local user guide:
+- `~/.grok/docs/user-guide/08-skills.md`
+- `~/.grok/docs/user-guide/07-mcp-servers.md`
+- `~/.grok/docs/user-guide/16-subagents.md`
+- `~/.grok/docs/user-guide/19-plan-mode.md`
+- And related files (headless, background tasks, permissions)

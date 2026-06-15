@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v2 (idempotent)
+# grok-build skill installer — v2.1 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
-# Or, from a local clone:
+# Or, from a local clone (recommended for development):
 #   ./install.sh
 #
 # Re-running this script is safe: Claude Code & Grok files are overwritten,
 # and the Codex AGENTS.md block is replaced in place (no duplication).
+#
+# This installer assumes `grok` is already installed and `grok login` has been run.
+# It only installs the skill definition.
 #
 # Flags:
 #   --uninstall   Remove the skill from every detected agent.
@@ -97,19 +100,41 @@ if command -v claude >/dev/null 2>&1 || [[ -d "$HOME/.claude" ]]; then
   fi
 fi
 
-# ─── Grok Build ───────────────────────────────────────────────────────────────
+# ─── Grok Build (user) ────────────────────────────────────────────────────────
 if command -v grok >/dev/null 2>&1 || [[ -d "$HOME/.grok" ]]; then
   target="$HOME/.grok/skills/grok-build/SKILL.md"
   if [[ "$UNINSTALL" -eq 1 ]]; then
     if [[ -f "$target" ]]; then
       rm -f "$target"
       rmdir "$(dirname "$target")" 2>/dev/null || true
-      green "✓ Removed from Grok Build   → $target"
+      green "✓ Removed from Grok Build (user) → $target"
       removed_any=1
     fi
   else
     fetch_skill_to "$target"
-    green "✓ Installed for Grok Build   → $target"
+    green "✓ Installed for Grok Build (user) → $target"
+    installed_any=1
+  fi
+fi
+
+# ─── Grok Build (project-local, if inside a git repo with .grok) ──────────────
+if [[ -d ".git" || -f ".grok/config.toml" ]]; then
+  proj_target=".grok/skills/grok-build/SKILL.md"
+  if [[ "$UNINSTALL" -eq 1 ]]; then
+    if [[ -f "$proj_target" ]]; then
+      rm -f "$proj_target"
+      rmdir "$(dirname "$proj_target")" 2>/dev/null || true
+      green "✓ Removed from project .grok/skills → $proj_target"
+      removed_any=1
+    fi
+  else
+    mkdir -p "$(dirname "$proj_target")"
+    if [[ -n "$SCRIPT_DIR" && -f "$SCRIPT_DIR/$SKILL_PATH" ]]; then
+      cp "$SCRIPT_DIR/$SKILL_PATH" "$proj_target"
+    else
+      curl -fsSL "$REPO_RAW/$SKILL_PATH" -o "$proj_target"
+    fi
+    green "✓ Installed for this project (local) → $proj_target"
     installed_any=1
   fi
 fi
@@ -156,4 +181,6 @@ if [[ "$installed_any" -eq 0 ]]; then
 fi
 
 cyan "→ Done. Invoke with /grok-build (Claude Code, Grok) or auto-loaded in Codex."
-cyan "  Tip: re-run this script anytime to pull the latest version. To remove: ./install.sh --uninstall"
+cyan "  Tip: re-run this script (or ./install.sh from a clone) anytime to update."
+cyan "  For project-local skills: the installer also writes to .grok/skills/ when run inside a git repo."
+cyan "  To remove: ./install.sh --uninstall"

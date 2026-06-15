@@ -6,7 +6,7 @@ Two paths — pick whichever you prefer.
 
 Prereq: [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login` once).
 
-From this folder (`grok-build-skill/`):
+From this folder:
 
 ```bash
 chmod +x install.sh && \
@@ -14,16 +14,10 @@ git init -b main && \
 git add . && \
 git commit -m "Initial commit: grok-build skill" && \
 gh repo create grok-build-skill --public --source=. --remote=origin --push \
-  --description "Drop-in skill teaching Claude Code, Grok, and Codex to drive the xAI Grok Build CLI in headless mode (imagine, imagine-video, coding tasks, ACP)."
+  --description "Drop-in skill teaching agents to drive the xAI Grok Build CLI in headless mode (plus native Grok tool guidance)."
 ```
 
-That creates `https://github.com/<your-user>/grok-build-skill` and pushes everything.
-
-Afterwards, edit `README.md` and `install.sh` to replace `<YOUR_USER>` / `REPLACE_ME` with your actual GitHub username, then:
-
-```bash
-git commit -am "Wire up install URLs" && git push
-```
+This creates the repo and pushes. Then edit `README.md` and `install.sh` to wire the real username into the raw URLs, commit, and push.
 
 ## Option B — Manual via github.com
 
@@ -52,14 +46,8 @@ curl -fsSL https://raw.githubusercontent.com/<your-user>/grok-build-skill/main/i
 
 …and in Claude Code, `/grok-build` should appear as a slash command. In a Grok TUI, the same. In Codex, the skill content is auto-loaded from `~/.codex/AGENTS.md`.
 
-## (Optional) List it in the xAI Build marketplace
+## (Optional) Make it discoverable
 
-Per xAI's docs, marketplaces are configured in `~/.grok/config.toml`:
-
-```toml
-[[marketplace.sources]]
-name  = "grok-build-skill"
-url   = "https://github.com/<your-user>/grok-build-skill"
-```
-
-Users who add that block get the skill discoverable via Grok's `/plugins` UI.
+- Skills are auto-discovered from `~/.grok/skills/`, `~/.claude/skills/`, project `.grok/skills/`, and additional paths in `~/.grok/config.toml`.
+- You can also configure marketplace sources in config if desired (see current user-guide 08-skills.md and 07-mcp-servers for details).
+- Re-running the installer (or `grok inspect`) will pick up updates quickly.
