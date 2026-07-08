@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.4 — 2026-07-08
+
+### Evolution with Grok Build (post 0.2.x)
+- Updated for current Grok Build realities (from official docs + local `~/.grok/docs/user-guide/` + changelog):
+  - **Auth scope**: Explicitly scoped to users who have **already installed Grok Build and run `grok login`**. 
+  - Now includes clear first-time setup steps (install → `grok login` → verify) when the user is not yet logged in.
+  - The skill still strongly assumes logged-in usage and does **not** promote `XAI_API_KEY`.
+  - Improved failure mode guidance for the "not logged in" case.
+  - **Flags**: Expanded table with `--json-schema`, `--allow`/`--deny` (with syntax examples), `--sandbox`, `--rules`, `--fork-session`, `--no-auto-update`, `--check`/`--self-verify`, updated effort levels (`none`...`max`).
+  - **Permissions & safety**: Promoted modern narrow `--allow`/`--deny` patterns + hooks over blanket `--yolo`. Updated noise reduction section.
+  - **Headless improvements**: Note that runs now wait for background tasks/subagents. Added guidance on `--json-schema` for machine-readable structured output.
+  - **Discovery & inspection**: Stronger emphasis on `grok models` + `grok inspect` as mandatory first step.
+  - Refreshed failure modes, quick reference, recommended patterns, and sources.
+- **High priority recommendations implemented**:
+  - Added `scripts/validate-skill.sh` (frontmatter + core section + concept sanity checks).
+  - Added `scripts/install-smoke.sh` (idempotency + uninstall verification using fake HOME + project context).
+- **Medium priority**:
+  - Added explicit pre-flight verification patterns (`grok inspect`, `grok models`, `git status`) and compatibility notes throughout.
+  - New validation + smoke test scripts serve as living documentation of expected structure.
+- Bumped version to 2.4, updated frontmatter and all references.
+- Minor cleanups for accuracy with 2026-07 Grok Build.
+
 ## v2.3 — 2026-06-15
 
 ### Noise, hook spam, and long-running delegation robustness (second round of real Codex feedback)

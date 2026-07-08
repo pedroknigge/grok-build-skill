@@ -70,22 +70,27 @@ That removes the skill from all detected agents and restores the original `AGENT
 
 | Capability                  | CLI Delegation Example                                      | Native Grok Alternative (when available) |
 |-----------------------------|-------------------------------------------------------------|------------------------------------------|
-| Image / video generation    | `grok -p "/imagine a neon Tokyo alley, 35mm" --always-approve` | `image_gen`, `image_to_video`, `image_edit`, `reference_to_video` |
-| Repo Q&A / coding tasks     | `grok -p "@src/ Explain..." --cwd "$REPO" --output-format json` | Direct tools + `spawn_subagent` + `todo_write` |
-| Targeted refactor           | `grok -p "@src/utils/... Refactor..." --always-approve`     | `search_replace` + subagents or plan mode |
-| Multi-turn / long work      | Named sessions (`-s` / `-r`) + streaming-json               | `spawn_subagent`, background tasks + `monitor`, scheduler |
-| Ambiguous architecture      | Multi-turn planning prompt to grok-build (use `grok models` first) | `enter_plan_mode` → design → `exit_plan_mode` |
-| Integrations (GitHub, deploys, browser, designs) | Delegate via CLI prompt                                     | `search_tool` + `use_tool` (MCP) |
-| Progress visibility         | Parse JSON / NDJSON                                         | `todo_write` (live task list) |
+| Image / video generation    | `grok -p "/imagine ..." --always-approve` | `image_gen`, `image_to_video`, `image_edit`, `reference_to_video` |
+| Repo Q&A / coding tasks     | `grok -p "@src/ ..." --cwd "$REPO" --output-format json --no-auto-update` | Direct tools + `spawn_subagent` + `todo_write` |
+| Structured output           | `--json-schema '...' --output-format json` | Native tool results |
+| Long / noisy work           | `--allow`/`--deny` + `2>/dev/null \| jq` + strict prompt | `monitor`, subagents |
+| Ambiguous architecture      | Multi-turn to grok-build (discover with `grok models`)     | `enter_plan_mode` → `exit_plan_mode` |
+| Integrations (GitHub, deploys, etc.) | Delegate via CLI prompt                                     | `search_tool` + `use_tool` (MCP) |
+| Permission control          | `--allow 'Bash(git *)' --deny 'Bash(rm*)'`                  | Built-in permission system + hooks |
 
 See [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) for the complete reference (including the important "Native Grok vs CLI" decision guide).
 
 ## Prerequisites
 
-- `grok` binary already on `PATH`
-- User has run `grok login` at least once (cached token — this is the only supported auth mode)
+- You have **Grok Build installed** (`grok` command on PATH)
+- You have **already run `grok login`** successfully
 
-**Warning:** This skill only works with the `grok login` cached token flow. It does **not** support `XAI_API_KEY` direct API usage. A clear warning is included in the skill itself.
+If you're not set up yet:
+1. Install: `curl -fsSL https://x.ai/cli/install.sh | bash`
+2. Log in: `grok login`
+3. Then use this skill.
+
+This skill is for the logged-in flow only. It does not cover `XAI_API_KEY`. Full details in `skills/grok-build/SKILL.md`.
 
 Before heavy delegation, `grok inspect` is recommended to verify the environment.
 
@@ -104,26 +109,32 @@ MIT — see [`LICENSE`](./LICENSE).
 
 ## Contributing
 
-PRs are very welcome. The goal is to keep the skill **short, accurate, and high-signal** while reflecting the latest Grok Build capabilities (new headless flags, MCP usage patterns with `search_tool`+`use_tool`, subagents, plan mode, direct image tools, background/monitoring, permissions model, richer skill frontmatter, etc.).
+PRs are very welcome. The goal is to keep the skill **short, accurate, and high-signal** while reflecting the latest Grok Build capabilities.
 
 When updating:
 - Edit the authoritative content in `skills/grok-build/SKILL.md`
 - Keep the "Native Grok vs CLI delegation" guidance honest
-- Update the quick reference and tables in README
-- Bump version in frontmatter + add entry to CHANGELOG.md
-- Test that the one-liner installer still works
+- Update quick reference tables + CHANGELOG.md
+- Bump `version` in the frontmatter of SKILL.md
+- Run `./scripts/validate-skill.sh`
+- Run `./scripts/install-smoke.sh` (tests idempotency and uninstall)
+- Verify the one-liner installer still works
 
-See the local `~/.grok/docs/user-guide/` files (especially 07-mcp-servers, 08-skills, 14-headless, 16-subagents, 19-plan-mode, 20-background-tasks, 22-permissions) for the current truth.
+See local `~/.grok/docs/user-guide/` (especially 14-headless-mode.md, 08-skills.md, 22-permissions-and-safety.md) and the official changelog at https://x.ai/build/changelog.
+
+### Development helpers
+
+- `./scripts/validate-skill.sh` — basic frontmatter and structure checks
+- `./scripts/install-smoke.sh` — tests installer idempotency and uninstall
 
 ## Sources
 
 Official:
-- [Grok Build — Getting Started](https://docs.x.ai/build/overview)
+- [Grok Build Overview](https://docs.x.ai/build/overview)
 - [Headless & Scripting](https://docs.x.ai/build/cli/headless-scripting)
+- [Grok Build Changelog](https://x.ai/build/changelog)
 
-For the current Grok environment also consult the local user guide:
+For the current Grok environment also consult:
+- `~/.grok/docs/user-guide/14-headless-mode.md`
 - `~/.grok/docs/user-guide/08-skills.md`
-- `~/.grok/docs/user-guide/07-mcp-servers.md`
-- `~/.grok/docs/user-guide/16-subagents.md`
-- `~/.grok/docs/user-guide/19-plan-mode.md`
-- And related files (headless, background tasks, permissions)
+- `~/.grok/docs/user-guide/22-permissions-and-safety.md`

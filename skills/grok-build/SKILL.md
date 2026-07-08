@@ -6,9 +6,9 @@ allowed-tools: run_terminal_command
 argument-hint: the prompt or task to send to grok
 user-invocable: true
 metadata:
-  version: "2.3"
-  last-updated: "2026-06-15"
-  focus: "CLI delegation patterns + guidance on when to prefer native Grok tools instead"
+  version: "2.4"
+  last-updated: "2026-07-08"
+  focus: "CLI delegation patterns + guidance on when to prefer native Grok tools instead. Assumes Grok Build is installed and user has run `grok login`. Includes setup steps for first-time users."
 ---
 
 # Grok Build CLI
@@ -52,11 +52,31 @@ The best agents **compose** both: use native tools + subagents for most work, an
 
 ## Prerequisites
 
-This skill assumes `grok` is already installed on PATH and the user has successfully run `grok login` (at least once). The `grok login` flow caches a token in `~/.grok/` that headless calls use automatically.
+**This skill is meant to be used after you are already logged in.**
 
-**Important warning (only mode supported):** This skill and all examples are built exclusively for the `grok login` cached-token flow. **It does not support or use `XAI_API_KEY` direct API mode.** If `grok login` has not been completed, headless calls will typically hang (trying to open a browser) or fail.
+### First-time setup (do this once)
 
-Before heavy use, run `grok inspect` (from the host or inside a delegated call) to verify the environment, discovered skills, plugins, and MCP servers.
+1. Install Grok Build (if you don't have the `grok` command yet):
+   ```bash
+   curl -fsSL https://x.ai/cli/install.sh | bash
+   ```
+
+2. Log in (this creates the cached token that headless mode uses):
+   ```bash
+   grok login
+   ```
+
+3. Verify everything is ready:
+   ```bash
+   grok inspect
+   grok models
+   ```
+
+This skill assumes you have already completed the steps above. It is designed exclusively for the normal logged-in flow using the token from `grok login`.
+
+**We do not cover `XAI_API_KEY` here.** If you haven't run `grok login`, headless calls will usually hang or try to open a browser.
+
+Before heavy delegation, it's recommended to run `grok inspect` and `grok models` to confirm your setup.
 
 ## Headless usage (the main entry point)
 
@@ -66,118 +86,123 @@ The host agent should almost always invoke `grok` with `-p` / `--single <PROMPT>
 grok -p "Your prompt here"
 ```
 
-### Important flags (updated for current versions)
+### Important flags (updated for current Grok Build)
 
 | Flag                        | Purpose |
 |-----------------------------|---------|
 | `-p, --single <PROMPT>`     | Send one prompt and exit. **Use this for almost all headless/scripted calls.** |
-| `-m, --model <MODEL>`       | Choose model (e.g. `grok-build`). Run `grok models` to list exact IDs available in your install. |
-| `-s, --session-id <ID>`     | Create or name a session for multi-turn continuity. |
-| `-r, --resume <ID>`         | Resume a previous named session. |
+| `-m, --model <MODEL>`       | Choose model (e.g. `grok-build`). Run `grok models` first. |
+| `-s, --session-id <ID>`     | Create a **new** session (UUID only). Use `--fork-session` with `-r`/`-c` if needed. |
+| `-r, --resume <ID>`         | Resume a previous session by ID. |
 | `-c, --continue`            | Continue the most recent session in the current directory. |
-| `--cwd <PATH>`              | Execute as if run from this directory (critical for `@file` / repo context resolution). |
-| `--output-format <FMT>`     | `plain` (human text), `json` (final object), `streaming-json` (NDJSON events). |
-| `--always-approve`          | Skip permission prompts (equivalent to yolo for the delegated agent). Required for unattended automation. |
-| `--yolo`                    | Stronger auto-approve mode (see permissions docs). |
-| `--permission-mode <MODE>`  | `bypassPermissions`, `acceptEdits`, etc. |
-| `--tools <TOOLS>`           | Comma-separated allowlist of tools the delegated grok may use. |
-| `--disallowed-tools <TOOLS>`| Denylist (supports `Agent` entries). |
-| `--effort <LEVEL>`          | `low` / `medium` / `high` / `xhigh` / `max` reasoning effort (headless only). |
-| `--max-turns <N>`           | Hard limit on agentic turns. |
+| `--fork-session`            | With resume/continue, fork into a fresh session ID. |
+| `--cwd <PATH>`              | Execute as if run from this directory (critical for `@file` / repo context). |
+| `--output-format <FMT>`     | `plain`, `json`, `streaming-json`. |
+| `--always-approve` / `--yolo` | Auto-approve tools (required for unattended work). |
+| `--permission-mode <MODE>` | `bypassPermissions` etc. (limited wiring; prefer `--allow`/`--deny` + `dontAsk`). |
+| `--allow <RULE>`            | Permission allow rule, repeatable (e.g. `Bash(git *)`, `Read(src/**)`, `MCPTool(...)`). |
+| `--deny <RULE>`             | Permission deny rule (wins over allow). Use for safety. |
+| `--tools <TOOLS>`           | Allowlist (comma sep). Internal tool names e.g. `run_terminal_cmd`. |
+| `--disallowed-tools <TOOLS>`| Denylist. Supports `Agent`, `Agent(explore)`, etc. |
+| `--effort <LEVEL>` / `--reasoning-effort` | `none` / `minimal` / `low` / `medium` / `high` / `xhigh` / `max`. |
+| `--max-turns <N>`           | Hard limit on turns. |
+| `--json-schema <SCHEMA>`    | Constrain final output to a JSON Schema (headless). |
+| `--rules <TEXT>`            | Inject custom rules into the system prompt. |
+| `--sandbox <PROFILE>`       | Sandbox profile (`strict` etc.) for the session. |
+| `--no-auto-update`          | Suppress update checks (recommended in CI/scripts). |
+| `--check` / `--self-verify` | Append a verification loop (headless). |
 
 ### Recommended invocation pattern from another agent
 
-**Always discover the exact model name first.** Model IDs vary by installation (common values: `grok-build`, `grok-build-0.1`, or custom entries from `~/.grok/config.toml`).
+**Always discover the exact model name first.** Run `grok models` (and `grok inspect`) before delegation.
+
+This skill assumes you have already installed Grok Build and run `grok login`.
 
 ```bash
-# 1. (Optional but recommended) Pre-flight checks
+# 1. Pre-flight (strongly recommended)
 command -v grok && grok --version
 git status --short
 grok inspect
-grok models          # <-- discover exact coding model IDs
+grok models
 
-# 2. Robust one-shot delegation (Codex / Claude Code / scripts)
-MODEL="grok-build"   # fallback; prefer value from `grok models`
+# 2. Robust one-shot delegation (assumes Grok Build is installed + you ran `grok login`)
+MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)
+
 grok -p "$PROMPT" \
   --cwd "$REPO_ROOT" \
   --model "$MODEL" \
   --output-format json \
   --always-approve \
-  --effort high
+  --effort high \
+  --no-auto-update
 ```
 
-For maximum robustness in other agents, capture the first model from `grok models`:
+Prefer `--output-format json` + `jq`. For structured data, consider `--json-schema`.
 
-```bash
-MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)
-```
-
-Prefer `--output-format json` (or `streaming-json`) and parse the result. This reduces (but does not eliminate) environment warning noise compared to plain text. For broad audits that trigger many hooks in the delegated environment, combine with all the techniques in the "Reducing environment noise..." section below.
-
-**Auth is provided automatically** by the `grok login` cached token in `~/.grok/`. No environment variables are required.
+See "Reducing environment noise..." below for production-grade patterns.
 
 ### Reducing environment noise, hook spam, and extracting only the final report
 
-This is especially important when the caller is **Codex, Claude Code, or another non-Grok agent** delegating long-running or broad tasks (full-repo audits, migrations, large refactors).
+This is especially important when the caller is **Codex, Claude Code, or another non-Grok agent** delegating long-running or broad tasks.
 
-Even when you pass `--output-format json`, the `grok` CLI + the delegated Grok instance's environment frequently emit large amounts of:
-- Hook execution traces (PreToolUse, PostToolUse, etc.)
-- Plugin / MCP registration and failure logs ("hooks fallidos del entorno")
-- Permission system and tool invocation banners
-- Internal warnings from the user's `~/.grok` config, project-local hooks, or installed skills
+**Recent improvement:** Headless runs now wait for background tasks and subagents to finish before exiting (good for correctness).
 
-This noise can be hundreds of lines and makes the process *appear* stuck or produce unmanageable output for the caller.
+Even with `--output-format json`, you will often see:
+- Hook traces, plugin/MCP warnings
+- Permission banners
+- Environment diagnostics
 
-#### Practical noise-reduction techniques
+Noise can still be significant. Use the mitigations below.
 
-1. **Suppress stderr** (most hook and environment spam goes here):
+#### Practical noise-reduction techniques (updated)
+
+1. **Suppress stderr**:
+   ```bash
+   grok -p "$PROMPT" --output-format json --always-approve 2>/dev/null
+   ```
+
+2. **Extract final JSON**:
+   ```bash
+   ... | jq -s 'last'
+   ```
+
+3. **Streaming + filter**:
+   ```bash
+   ... --output-format streaming-json 2>/dev/null | \
+     jq -c 'select(.type == "end" or .type == "final_assistant_message")' | tail -1
+   ```
+
+4. **Strict prompt + escape hatch** (critical):
+   Tell the delegated agent to emit **only** the final report and to exit early if only noise remains.
+
+5. **Modern safety + reduced noise with permissions** (preferred over broad --yolo):
+   Use narrow `--allow` / `--deny` instead of blanket approval where possible:
    ```bash
    grok -p "$PROMPT" \
      --cwd "$REPO_ROOT" --model "$MODEL" \
-     --output-format json --always-approve 2>/dev/null
+     --output-format json \
+     --no-auto-update \
+     --allow 'Read' --allow 'Grep' \
+     --allow 'Bash(git *)' --allow 'Bash(npm run *)' \
+     --deny 'Bash(rm -rf *)' --deny 'Edit(**/secrets/**)' \
+     --max-turns 25 2>/dev/null | jq -s 'last'
    ```
 
-2. **Extract only the final JSON object** (the clean report) with `jq`:
+6. **Tool restrictions** (still excellent for read-only):
    ```bash
-   grok ... --output-format json 2>/dev/null | jq -s 'last | .final_assistant_message // .'
+   --tools "read_file,grep,list_dir,run_terminal_cmd" \
+   --disallowed-tools "search_replace,write,spawn_subagent,Agent"
    ```
 
-3. **For very long runs, use streaming-json + filter**:
-   ```bash
-   grok -p "$PROMPT" --output-format streaming-json --always-approve 2>/dev/null | \
-     jq -c 'select(.type == "final_assistant_message" or .type == "session_end" or .type == "assistant_message")' | \
-     tail -1
-   ```
+7. **Caller-side safeguards**:
+   - `--max-turns`, `timeout`, capture to file + `jq`.
+   - Kill process after seeing final JSON if it keeps spewing noise.
+   - **Always run local verification in parallel** (typecheck, lint, test, build, etc.).
+   - Note: no `--quiet` flag exists; these layered techniques are the current best practice.
 
-4. **Instruct the delegated agent very strictly inside the prompt** (most important lever). Example for a read-only project audit:
-   > "Actúa como revisor senior. 
-   > - NO modifiques archivos bajo ninguna circunstancia. Solo lectura y comandos de verificación seguros (npm run typecheck, lint, test, build, check:schema, rg, git, etc.).
-   > - Al terminar, emite **ÚNICAMENTE** el reporte final en el formato exacto que pedí (sin texto extra antes o después).
-   > - Evita cualquier acción que no sea estrictamente necesaria porque puede disparar hooks ruidosos o fallidos del entorno.
-   > - Si después de varios turnos solo estás repitiendo warnings de hooks, resume lo que tengas y produce el reporte final de inmediato.
-   > - Cuando termines, sal limpiamente."
+Headless now waits for background tasks/subagents, which improves reliability of the final report.
 
-   Give the inner grok a clear "escape hatch": tell it that if it sees the process becoming noisy with repeated hook warnings, it should synthesize the best report it can from what it already discovered and exit.
-
-5. **Aggressively restrict tools for read-only work** (e.g. the "analiza el proyecto buscando errores" case):
-   ```bash
-   grok -p "$PROMPT" \
-     --tools "read_file,grep,run_terminal_command,list_dir,git_status" \
-     --disallowed-tools "write_file,search_replace,edit,spawn_subagent,search_tool,use_tool,create_file" \
-     --output-format json --always-approve 2>/dev/null
-   ```
-   (Adjust the allowlist to whatever the inner task actually needs. Fewer tools = fewer hook firings.)
-
-6. **Caller-side safeguards** (patterns observed in real usage with Codex):
-   - Set a reasonable `--max-turns` (e.g. 15-25 for broad audits).
-   - Use `timeout 300s grok ...` (or the caller's equivalent) so a hung/noisy process doesn't block forever.
-   - Run the command and capture to a temp file, then extract the last complete JSON object from it.
-   - If the process is still producing only hook noise after several minutes and you have the final report in the buffer, kill it (`pkill -f "grok -p"` or equivalent) and parse whatever final JSON you already received.
-   - **Launch local fast checks in parallel**: While the delegated grok is running, the host should immediately run its own `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, `npm run check:schema`, etc. These are fast, reliable, and don't suffer from hook noise. If the grok CLI never delivers a clean report, you still have high-quality local signals to include.
-
-   There is currently no simple CLI flag (such as `--quiet` or `--disable-hooks`) to silence the delegated environment's hooks and diagnostic output for headless runs. The combination of `2>/dev/null` + tool restrictions + very strict "final report only + escape hatch" prompting + caller-side extraction/kill is the practical workaround.
-
-#### Recommended enhanced pattern for heavy audits / long work from another agent
+#### Recommended enhanced pattern for heavy audits / long work
 
 ```bash
 MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)
@@ -188,11 +213,14 @@ grok -p "$PROMPT" \
   --output-format json \
   --always-approve \
   --effort high \
-  --max-turns 20 \
+  --max-turns 25 \
+  --no-auto-update \
   2>/dev/null | jq -s 'last'
 ```
 
-Parse the result on the caller side and (optionally) post-process or pretty-print the report.
+For stricter control, add targeted `--allow` / `--deny`.
+
+For structured output, add `--json-schema '{...}'`.
 
 #### After you receive the report (verification is your job)
 
@@ -253,9 +281,9 @@ Slash commands (including skills) work inside headless prompts. Include them as 
 | `/<skill-name>`      | Invoke another skill (e.g. /commit)   | `grok -p "/commit Conventional Commits style"` |
 | `/context`, `/plugins`, `/mcps`, `/hooks` | Diagnostics / UIs (TUI-heavy) | Skip or use for inspect only in headless. |
 
-**Note on images/videos:** When the *host* is a modern Grok session that has direct `image_gen` / `image_to_video` tools available, those are usually faster and more integrated than delegating via `/imagine`. Use the CLI delegation when you specifically want the Grok Imagine flow through the grok binary (or the host lacks the native tools).
+**Note on images/videos:** Prefer native `image_gen` etc. on capable Grok hosts. Use CLI `/imagine` delegation only when you specifically need the Grok Imagine path or isolation.
 
-Image/video files are written to the current working directory (or the location configured for the Imagine plugin). The delegated grok will usually print the paths — the host should `ls` or inspect to confirm.
+**New structured output:** Use `--json-schema` (headless) to force validated JSON instead of free text. Great for machine consumption.
 
 ### Examples for image and video (CLI delegation)
 
@@ -331,7 +359,7 @@ For long-lived integration (IDEs, custom clients) use Agent Client Protocol:
 grok agent stdio
 ```
 
-It speaks JSON-RPC. Authenticate with the `cached_token` from `grok login`. See current xAI headless scripting docs and the Agent Client Protocol spec for full details (initialize, session/new, session/prompt, streaming updates).
+It speaks JSON-RPC. This skill assumes you have Grok Build installed and have already run `grok login` (it uses the cached token). See the official headless scripting docs for full ACP details.
 
 For most automation from another agent, plain `-p` headless is simpler and sufficient.
 
@@ -373,14 +401,14 @@ grok inspect
 
 | Symptom                        | Likely cause                                      | Fix |
 |--------------------------------|---------------------------------------------------|-----|
-| `grok` hangs on first run      | No `grok login` cached token (tries browser)      | Tell user to run `grok login` interactively once. |
-| Repeated permission prompts    | Default approval_mode or no `--always-approve`    | Add `--always-approve` (or `--yolo`). Configure `[ui] approval_mode = "always-approve"` or use permission modes. |
-| `@file` / repo context wrong   | `--cwd` missing or incorrect                      | Always pass `--cwd "$REPO_ROOT"`. |
-| Truncated / empty long output  | Used `plain` on a streaming-heavy task            | Switch to `streaming-json` and consume events. |
-| Wrong / unknown model          | Model name does not exist in this installation (e.g. `grok-build-0.1` not recognized) | Run `grok models` (and `grok inspect`) first to list the exact model IDs your binary offers. The primary coding model is usually named `grok-build`. Use that (or the first listed entry) and fall back gracefully in scripts. |
-| MCP tool calls fail            | Host (or delegated) didn't call `search_tool` first | Teach the strict `search_tool` → `use_tool` pattern for all MCPs. |
-| Subagent / plan mode unavailable | Older grok CLI or subagents disabled in config    | Check `grok inspect` and config (`GROK_SUBAGENTS`, `[subagents]`). |
-| Excessive hook/environment noise, process appears stuck | Delegated Grok's hooks, plugins, MCPs and permission system emit lots of diagnostic output (even with `--output-format json`). Long audits accumulate hundreds of lines of "hooks fallidos" etc. | Always use `2>/dev/null`, pipe through `jq -s 'last'` (or filter streaming-json + `tail -1`), restrict tools with `--tools`/`--disallowed-tools`, and put strict "emit ONLY the final report at the end, nothing else" instructions in the prompt. Use `--max-turns` + `timeout`. See the "Reducing environment noise..." section above. If you already have the final JSON in the buffer, extract it and kill the process. |
+| Hangs or tries to open browser | You have not run `grok login` yet (no cached credentials) | First install Grok Build if needed (`curl -fsSL https://x.ai/cli/install.sh | bash`), then run `grok login`. Only use this skill after you are logged in. |
+| Repeated permission prompts    | No `--always-approve` / `--yolo` or restrictive policy | Use `--always-approve`, or better: `--allow` + `--deny` rules + `dontAsk`. |
+| Wrong repo context             | Missing or incorrect `--cwd`                      | Always pass `--cwd "$REPO_ROOT"`. |
+| Noisy output / appears stuck   | Hook/plugin/MCP/permission spam                   | `2>/dev/null \| jq -s 'last'`, strict "final report only" prompt, tool restrictions, `--max-turns`, `--no-auto-update`. |
+| Unknown model                  | Hard-coded old model name                         | Always `grok models` first. |
+| MCP calls fail                 | Skipped `search_tool` first                       | Teach `search_tool` → `use_tool` pattern. |
+| Subagents/plan unavailable     | Disabled in config or old version                 | `grok inspect`; check `[subagents]`. |
+| Structured output needed       | Using plain text for machine parsing              | Use `--json-schema` or strict JSON in prompt + `--output-format json`. |
 
 See the full Permissions & Safety guide for PreToolUse hooks, fast-paths for reads, `bypassPermissions`, etc.
 
@@ -390,31 +418,35 @@ See the full Permissions & Safety guide for PreToolUse hooks, fast-paths for rea
 
 ```bash
 # Image / video
-grok -p "/imagine <prompt>" --cwd ./out --always-approve
+grok -p "/imagine <prompt>" --cwd ./out --always-approve --no-auto-update
 grok -p "/imagine-video <prompt>" --cwd ./out --always-approve
 
-# One-shot coding agent (recommended for delegation)
-# Discover model first: grok models
-# For noisy/long runs add: 2>/dev/null | jq -s 'last'   + strict "final report only" in prompt
-grok -p "<task description>" -m grok-build --cwd "$REPO" \
+# One-shot (discover model first!)
+MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)
+grok -p "<task>" -m "$MODEL" --cwd "$REPO" \
+     --output-format json --always-approve --no-auto-update
+
+# With modern permission controls (safer than blanket yolo)
+grok -p "..." --allow 'Read' --allow 'Bash(git *)' --deny 'Bash(rm*)' \
+     --output-format json --always-approve --no-auto-update
+
+# Structured JSON output
+grok -p "..." --json-schema '{"type":"object","properties":{"findings":{"type":"array"}}}' \
      --output-format json --always-approve
 
-# Multi-turn named session
-grok -s feat-xyz -p "First prompt..." --cwd "$REPO" --always-approve
-grok -r feat-xyz -p "Next step..." --always-approve --cwd "$REPO"
+# Multi-turn
+grok -s feat-xyz -p "..." --cwd "$REPO" --always-approve --no-auto-update
+grok -r feat-xyz -p "..." --always-approve --cwd "$REPO"
 
-# Streaming progress (filter noise)
-grok -p "..." --output-format streaming-json --always-approve 2>/dev/null | \
-  jq -c 'select(.type == "final_assistant_message" or .type == "session_end")' | tail -1
+# Heavy audit (robust)
+MODEL=... 
+grok -p "Strict final report only..." --cwd "$REPO" --model "$MODEL" \
+  --output-format json --always-approve --effort high --max-turns 25 \
+  --no-auto-update 2>/dev/null | jq -s 'last'
 
-# Heavy repo audit / long task from another agent (noise reduction + final report only)
-MODEL=$(grok models 2>/dev/null | head -1 | awk '{print $1}' || echo grok-build)
-grok -p "Analyze the full project for errors... (strict report format only)" \
-  --cwd "$REPO" --model "$MODEL" --output-format json --always-approve \
-  --effort high --max-turns 20 2>/dev/null | jq -s 'last'
-
-# Inspect environment (very useful)
+# Inspect
 grok inspect
+grok models
 ```
 
 **When the host is native Grok (prefer these instead of or alongside CLI)**
@@ -430,17 +462,17 @@ grok inspect
 ## Sources
 
 Official:
-- [Grok Build — Getting Started](https://docs.x.ai/build/overview)
+- [Grok Build — Overview](https://docs.x.ai/build/overview)
 - [Headless & Scripting](https://docs.x.ai/build/cli/headless-scripting)
-- [Skills, Plugins & Marketplaces](https://docs.x.ai/build/features/skills-plugins-marketplaces)
+- [Grok Build Changelog](https://x.ai/build/changelog)
 
-Local environment (authoritative for this Grok version):
-- `~/.grok/docs/user-guide/08-skills.md`
-- `~/.grok/docs/user-guide/07-mcp-servers.md`
+Local authoritative docs (this environment):
 - `~/.grok/docs/user-guide/14-headless-mode.md`
+- `~/.grok/docs/user-guide/08-skills.md`
+- `~/.grok/docs/user-guide/22-permissions-and-safety.md`
 - `~/.grok/docs/user-guide/16-subagents.md`
 - `~/.grok/docs/user-guide/19-plan-mode.md`
-- `~/.grok/docs/user-guide/20-background-tasks.md`
-- `~/.grok/docs/user-guide/22-permissions-and-safety.md`
+- `~/.grok/docs/user-guide/07-mcp-servers.md`
+- `~/.grok/docs/user-guide/02-authentication.md`
 
-Keep this skill current as xAI ships new flags, MCPs, or agent primitives. PRs welcome.
+Run `grok inspect` regularly. PRs to keep this skill accurate are welcome.

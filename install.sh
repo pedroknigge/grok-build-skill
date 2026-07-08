@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v2.3 (idempotent)
+# grok-build skill installer — v2.4 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 # Or, from a local clone (recommended for development):
@@ -8,7 +8,7 @@
 # Re-running this script is safe: Claude Code & Grok files are overwritten,
 # and the Codex AGENTS.md block is replaced in place (no duplication).
 #
-# This installer assumes `grok` is already installed and `grok login` has been run.
+# This installer assumes `grok` is already installed and the user has run `grok login`.
 # It only installs the skill definition.
 #
 # Flags:
@@ -80,7 +80,7 @@ removed_any=0
 if [[ "$UNINSTALL" -eq 1 ]]; then
   cyan "→ grok-build skill uninstaller"
 else
-  cyan "→ grok-build skill installer (v2 — idempotent)"
+  cyan "→ grok-build skill installer (v2.4 — idempotent)"
 fi
 
 # ─── Claude Code ──────────────────────────────────────────────────────────────
