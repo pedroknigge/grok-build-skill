@@ -240,26 +240,26 @@ Even a "useful" report from the delegated grok often contains:
 Use something close to this when delegating a broad audit (adapted from real successful usage):
 
 ```
-Actua como revisor senior de codigo para este repositorio [framework].
+Act as a senior code reviewer for this [framework] repository.
 
-Objetivo: analizar el proyecto buscando errores reales, regresiones probables, problemas de seguridad, inconsistencias de datos, fallas de build/test o bugs de UX importantes.
+Objective: Analyze the project looking for real errors, likely regressions, security issues, data inconsistencies, build/test failures, or important UX bugs.
 
-Reglas estrictas:
-- NO modifiques archivos. Solo lectura y comandos de verificación.
-- Puedes ejecutar comandos seguros como npm run typecheck, npm run lint, npm run test, npm run build, npm run check:schema, rg, git, etc.
-- Prioriza hallazgos accionables con archivo y linea exacta.
-- Si un hallazgo es inferencia o no pudiste verificarlo directamente, dilo claramente.
-- Ignora nitpicks de estilo.
-- Enfocate especialmente en: [lista de áreas críticas del proyecto, ej. APIs, auth, Supabase/RLS, storage, webhooks, etc.].
+Strict rules:
+- DO NOT modify any files. Read-only and safe verification commands only.
+- You may run safe commands such as npm run typecheck, npm run lint, npm run test, npm run build, npm run check:schema, rg, git, etc.
+- Prioritize actionable findings with exact file and line.
+- If a finding is an inference or you couldn't verify it directly, state it clearly.
+- Ignore style nitpicks.
+- Focus especially on: [list of critical project areas, e.g. APIs, auth, Supabase/RLS, storage, webhooks, etc.].
 
-Devuelve un reporte en [idioma] con este formato exacto:
-1. Resumen ejecutivo: cantidad de hallazgos por severidad (P0/P1/P2/P3).
-2. Hallazgos: severidad, archivo:linea, descripcion, impacto, recomendacion concreta.
-3. Comandos ejecutados y resultado breve.
-4. Riesgos residuales o areas no verificadas.
+Return a report in English with this exact format:
+1. Executive summary: number of findings by severity (P0/P1/P2/P3).
+2. Findings: severity, file:line, description, impact, concrete recommendation.
+3. Commands executed and brief result.
+4. Residual risks or unverified areas.
 
-Si después de varios minutos solo ves warnings repetidos de hooks del entorno, resume lo que ya analizaste y emite el reporte final inmediatamente.
-Al terminar emite SOLO el reporte en el formato pedido. Nada más.
+If after several minutes you only see repeated environment hook warnings, summarize what you have already analyzed and emit the final report immediately.
+When finished emit ONLY the report in the requested format. Nothing else.
 ```
 
 This style produced a useful report in the trace that motivated these improvements.

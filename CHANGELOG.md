@@ -33,14 +33,14 @@
   - Streaming-json + `jq` filter + `tail -1` for very long runs
   - Extremely strict instructions *inside the prompt* the delegated grok receives ("emit NOTHING except the exact final structured report at the very end")
   - Aggressive `--tools` allowlist + `--disallowed-tools` for read-only audits to reduce hook firings
-  - Caller-side: `--max-turns`, `timeout`, capture-to-file + extract, or kill the process once the final JSON has been seen (exactly the strategy "limitaré la extracción al reporte final disponible o cortaré el proceso para no dejarlo colgado")
+  - Caller-side: `--max-turns`, `timeout`, capture-to-file + extract, or kill the process once the final JSON has been seen (exactly the strategy of limiting extraction to the final available report or killing the process to avoid hanging)
 - Updated the recommended pattern for heavy/long work to include the above.
 - Added a new dedicated row in the Failure modes table for this symptom, with pointer back to the noise-reduction section.
 - Enhanced the Quick reference card with:
   - A noise-filtered streaming example
   - A complete "heavy repo audit" example using the new techniques
 - Minor cleanups to surrounding advice (JSON preference, long-running notes).
-- This iteration makes the skill much more reliable when Codex (or similar agents) are asked to "delegar el análisis a Grok" via the skill.
+- This iteration makes the skill much more reliable when Codex (or similar agents) are asked to "delegate the analysis to Grok" via the skill.
 
 Additional lessons captured from the full trace:
 - The delegated process eventually terminated and produced a *useful* report, but only after many minutes of repeated hook warnings. The caller (Codex) wisely ran parallel local verification (`npm run typecheck` / `lint` / `test` / `check:schema`) instead of blocking.
