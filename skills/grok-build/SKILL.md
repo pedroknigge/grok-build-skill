@@ -6,7 +6,7 @@ allowed-tools: run_terminal_command
 argument-hint: the prompt or task to send to grok
 user-invocable: true
 metadata:
-  version: "2.4"
+  version: "2.4.1"
   last-updated: "2026-07-08"
   focus: "CLI delegation patterns + guidance on when to prefer native Grok tools instead. Assumes Grok Build is installed and user has run `grok login`. Includes setup steps for first-time users."
 ---

@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.4.1 — 2026-07-08
+
+### Documentation language
+- Translated all public documentation and examples to English.
+- Converted the Spanish auditor prompt template to a full English version.
+- Cleaned remaining Spanish phrases from CHANGELOG.md.
+
 ## v2.4 — 2026-07-08
 
 ### Evolution with Grok Build (post 0.2.x)

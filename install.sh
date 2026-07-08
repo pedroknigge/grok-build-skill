@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v2.4 (idempotent)
+# grok-build skill installer — v2.4.1 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 # Or, from a local clone (recommended for development):
