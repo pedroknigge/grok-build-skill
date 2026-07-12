@@ -8,11 +8,12 @@ Once installed, the host agent learns:
 - Generate images: `grok -p "/imagine ..." --always-approve`
 - Generate videos via the CLI
 - Delegate coding / refactoring to `grok-build` (run `grok models` to discover exact ID) with proper `@file` + `--cwd`
-- Streaming NDJSON, named sessions, JSON output, ACP
+- Streaming NDJSON, **UUID sessions** + resume, JSON output (including **usage/cost**), ACP
+- Isolated edits via `--worktree`, quality via `--best-of-n` / `--check`
 
 **Plus clear guidance on modern native alternatives** when the host *is* a capable Grok (spawn_subagent, todo_write, enter_plan_mode, direct `image_gen` tools, proper MCP usage, background monitoring, etc.).
 
-The skill is kept current with flags, permission models, MCP patterns, and agent orchestration primitives.
+The skill is kept current with Grok Build ~0.2.97+ flags, permission models, MCP patterns, and agent orchestration primitives.
 
 ## Quick install
 
@@ -72,7 +73,11 @@ That removes the skill from all detected agents and restores the original `AGENT
 |-----------------------------|-------------------------------------------------------------|------------------------------------------|
 | Image / video generation    | `grok -p "/imagine ..." --always-approve` | `image_gen`, `image_to_video`, `image_edit`, `reference_to_video` |
 | Repo Q&A / coding tasks     | `grok -p "@src/ ..." --cwd "$REPO" --output-format json --no-auto-update` | Direct tools + `spawn_subagent` + `todo_write` |
-| Structured output           | `--json-schema '...' --output-format json` | Native tool results |
+| Structured output           | `--json-schema '...'` (implies json) | Native tool results |
+| Usage / cost from headless  | `jq '{sessionId, num_turns, total_cost_usd, usage}'` | Host metering |
+| Isolated edits              | `--worktree feat --worktree-ref main` | `spawn_subagent` isolation / worktree |
+| Quality one-shots           | `--best-of-n 3 --check` | Parallel subagents + host tests |
+| Multi-turn sessions         | UUID via `-s` / capture `.sessionId`, then `-r` | Native conversation |
 | Long / noisy work           | `--allow`/`--deny` + `2>/dev/null \| jq` + strict prompt | `monitor`, subagents |
 | Ambiguous architecture      | Multi-turn to grok-build (discover with `grok models`)     | `enter_plan_mode` → `exit_plan_mode` |
 | Integrations (GitHub, deploys, etc.) | Delegate via CLI prompt                                     | `search_tool` + `use_tool` (MCP) |

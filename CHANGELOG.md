@@ -1,5 +1,40 @@
 # Changelog
 
+## v2.5 — 2026-07-12
+
+### Aligned with Grok Build ~0.2.97 / 0.2.98
+
+Content update driven by the official [Grok Build changelog](https://x.ai/build/changelog), live `grok --help`, and local `~/.grok/docs/user-guide/14-headless-mode.md`.
+
+**Accuracy fixes**
+- **Session IDs:** Removed invalid nickname examples (`-s img-session`, `-s feat-123`). `-s/--session-id` must be a **new UUID**; multi-turn uses `-r` / `-c` (with optional `--fork-session`).
+- Prefer `--always-approve` as the primary auto-approve flag (what `grok --help` lists); keep `--yolo` only as a docs alias note.
+
+**New / expanded headless surface**
+- Documented `--best-of-n`, `--worktree` / `--worktree-ref`, `--check` / `--self-verify`, `--prompt-file` / `--prompt-json`, `--verbatim`, `--agent` / `--agents`, `--system-prompt-override`, `--disable-web-search`, `--no-plan` / `--no-subagents` / `--no-memory` / `--experimental-memory`, `--restore-code`.
+- Permission modes list: `default | acceptEdits | auto | dontAsk | bypassPermissions | plan`.
+- Copy-paste patterns for **isolated worktree** refactors and **best-of-n + check** quality one-shots.
+- Brief `grok worktree list|rm|gc` cleanup pointer.
+
+**JSON spend / usage (0.2.97)**
+- Documented `text`, `sessionId`, `num_turns`, `usage`, `modelUsage`, `total_cost_usd`, `total_cost_usd_ticks`.
+- Token field policy (uncached `input_tokens` vs cache reads) and partial flags (`cost_is_partial`, `usage_is_incomplete`).
+- Prefer `jq -r '.text'` for single objects; keep `jq -s 'last'` as noisy-stream fallback.
+
+**Lifecycle & interrupts**
+- Headless waits for background tasks/subagents on normal exit, then **kills** model-started background tasks (no leak) — hosts must not rely on post-exit bg work.
+- SIGINT **130** / SIGTERM **143** vs error **1**, plus resume guidance.
+- Stdin is not the prompt; use `--prompt-file` or command substitution.
+- Env: `GROK_DISABLE_AUTOUPDATER`, `GROK_SANDBOX`.
+
+**Slash commands**
+- Added headless-relevant `/code-review`, `/goal`, `/effort` (flag preferred for one-shots).
+
+**Repo hygiene**
+- Bumped metadata to `2.5` / `2026-07-12`.
+- README table rows + installer version banner.
+- `scripts/validate-skill.sh` asserts `best-of-n`, worktree, session UUID, and usage/cost concepts.
+
 ## v2.4.1 — 2026-07-08
 
 ### Documentation language

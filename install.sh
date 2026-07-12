@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v2.4.1 (idempotent)
+# grok-build skill installer — v2.5 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 # Or, from a local clone (recommended for development):
@@ -80,7 +80,7 @@ removed_any=0
 if [[ "$UNINSTALL" -eq 1 ]]; then
   cyan "→ grok-build skill uninstaller"
 else
-  cyan "→ grok-build skill installer (v2.4 — idempotent)"
+  cyan "→ grok-build skill installer (v2.5 — idempotent)"
 fi
 
 # ─── Claude Code ──────────────────────────────────────────────────────────────
