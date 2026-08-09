@@ -1,5 +1,32 @@
 # Changelog
 
+## v3.0 — 2026-08-09
+
+### Skill 3.0 / Grok Build CLI 1.0.0+
+
+Full contract realignment against live `grok 1.0.0 (stable)`.
+
+**Breaking (vs skill 2.5 / CLI ~0.2.97)**
+- **Dead flags:** `--best-of-n`, `--check`, `--self-verify` error on CLI 1.0 — removed from operational recipes. Quality patterns moved to host multi-run + tests + native subagents (`references/quality-without-best-of-n.md`).
+- **Worktree:** Documented that headless (`-p`) does **not** create a worktree from `--worktree`. Isolation via host `git worktree` + `--cwd`, or interactive/agent worktrees; remote code restore uses `--restore-code --worktree`.
+- **Default model:** Discovery fallback is **`grok-4.5`** (not `grok-build`).
+- **Resume / restore:** Resume by ID or title (scripts prefer UUID). `--restore-code` requires `--resume`; remote needs `--worktree` for code.
+- **Output formats:** Documented all four — `plain`, `json`, `streaming-json`, **`streaming-messages-json`** — plus **`--include-partial-messages`**. `stopReason` snake_case (`end_turn`).
+
+**Content / layout**
+- Progressive modular skill: slim `SKILL.md` entrypoint (≤220 lines) + `skills/grok-build/references/` (`flags-1.0.md`, `output-formats.md`, `sessions-and-resume.md`, `failure-modes.md`, `quality-without-best-of-n.md`, `prompt-templates.md`).
+- Auth matrix: `grok login` / `--oauth` / `--device-auth`; invalid API key note; prefer session token.
+- Preflight: version ≥1.0, `grok doctor`, `inspect`, `models`.
+- Advanced (brief): `grok mcp list|enable|disable|doctor`, workflows enabled-by-default, `grok export`, `grok sessions search|delete`, env `GROK_SANDBOX`, `GROK_DISABLE_AUTOUPDATER`, `GROK_EXTRA_CA_BUNDLE`.
+
+**Packaging / CI**
+- Installer v3.0 installs full skill directory (SKILL.md + references/) for Claude/Grok/project; Codex embeds main SKILL.md + references note.
+- `scripts/validate-skill.sh` contract-aware (3.x, required 1.0 concepts, fail on dead-flag teaching / nickname sessions / `echo grok-build` fallback).
+- Optional `scripts/sync-check-cli.sh` compares live `grok --help` when available.
+- `scripts/install-smoke.sh` **always** uses FAKE_HOME first; asserts Codex non-duplication and clean uninstall.
+- GitHub Actions `.github/workflows/ci.yml` (validate + smoke).
+- `SHA256SUMS` for install.sh + skill entrypoint + references; README integrity notes.
+
 ## v2.5 — 2026-07-12
 
 ### Aligned with Grok Build ~0.2.97 / 0.2.98

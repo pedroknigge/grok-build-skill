@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate skill contract
+        run: ./scripts/validate-skill.sh
+
+      - name: Verify published checksums
+        run: shasum -a 256 -c SHA256SUMS
+
+      - name: Installer smoke test
+        run: ./scripts/install-smoke.sh
+
+      - name: Optional live CLI sync (skip if grok absent)
+        run: ./scripts/sync-check-cli.sh
