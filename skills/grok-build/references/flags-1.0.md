@@ -1,6 +1,6 @@
 # Grok Build CLI 1.0.13 — flags reference
 
-Verified against live `grok 1.0.13` (`grok --help`, clap-generated completions under `~/.grok/completions/`, and `~/.grok/docs/user-guide/14-headless-mode.md`). Several headless flags are **omitted from default `--help`** but are live (completions + clap): `--memory-flush`, `--background-wait-timeout`, `--load`, `--compaction-mode`, `--compaction-detail`, `--no-ask-user`, `--no-wait-for-background`, `--no-memory`, `--experimental-memory`. `--yolo` is a hidden alias of `--always-approve`.
+Verified against live `grok 1.0.13` (`grok --help`, clap-generated completions under `~/.grok/completions/`, and `~/.grok/docs/user-guide/14-headless-mode.md`). Several flags are **omitted from default `--help`** but are live (completions + clap): `--memory-flush`, `--background-wait-timeout`, `--load`, `--compaction-mode`, `--compaction-detail`, `--no-ask-user`, `--no-wait-for-background`, `--no-memory`, `--experimental-memory`, `--no-auto-update`. `--yolo` is a hidden alias of `--always-approve`.
 
 ## Dead flags (error if used)
 
@@ -29,11 +29,11 @@ Stdin is **not** the prompt.
 |------|---------|
 | `-m, --model <MODEL>` | Model ID. Discover with `grok models`. Default today **`grok-4.6`**; **`grok-4.5`** is still available. |
 | `--reasoning-effort` / `--effort` | Canonical levels: `none \| minimal \| low \| medium \| high \| xhigh \| max`. A model only accepts advertised levels. **`grok-4.6` extra effort `xhigh`** (4.5 menu has no `xhigh`). |
-| `--max-turns <N>` | Max agent turns (**headless-only**) |
+| `--max-turns <N>` | Max agent turns (**headless-only** per user-guide; default `grok --help` does not print that restriction) |
 | `--rules <TEXT>` | Append rules to system prompt |
 | `--system-prompt-override <PROMPT>` | Replace system prompt (alias `--system-prompt`) |
 | `--agent <NAME>` | Agent name or definition file |
-| `--agents <JSON>` | Inline subagent definitions (**headless-only**) |
+| `--agents <JSON>` | Inline subagent definitions (**headless-only** per user-guide; default `grok --help` does not print that restriction) |
 
 ## Sessions
 
@@ -71,8 +71,8 @@ Stdin is **not** the prompt.
 | `--permission-mode <MODE>` | `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan` |
 | `--allow <RULE>` | Permission allow (repeatable), e.g. `Bash(git *)`, `Read(src/**)` |
 | `--deny <RULE>` | Permission deny (wins over allow) |
-| `--tools <TOOLS>` | Allowlist comma-separated (**headless-only**) |
-| `--disallowed-tools <TOOLS>` | Denylist (**headless-only**); supports `Agent`, `Agent(explore)`, … |
+| `--tools <TOOLS>` | Allowlist comma-separated (**headless-only** per user-guide; default `grok --help` does not print that restriction) |
+| `--disallowed-tools <TOOLS>` | Denylist (**headless-only** per user-guide); supports `Agent`, `Agent(explore)`, … |
 | `--no-ask-user` | Skip ask-user style interaction |
 | `--no-wait-for-background` | Do not wait for background tasks before exit (**headless-only**; conflicts with `--background-wait-timeout`) |
 
@@ -111,7 +111,7 @@ Process-wide memory off: prefer **`GROK_MEMORY=0`**. `--no-memory` / `--experime
 | `grok mcp list\|enable\|disable\|doctor` | MCP management (`--json` on list/doctor). `grok mcp add` auto-http for bare `http(s)://` URLs |
 | `grok sessions list\|search\|delete` | Session index |
 | `grok export <ID> [file]` | Export transcript as Markdown (`-c` / `--clipboard`) |
-| `grok worktree list\|rm\|gc` | Worktree cleanup (`ls` alias; `show`; `detach`; `gc --max-age`) |
+| `grok worktree list\|rm\|gc` | Worktree cleanup (`ls` alias; `show`; `detach`; `gc --max-age`). Also live, not recipes: `salvage`, `clean-artifacts`, `db` |
 | `grok clone <url> [dir]` | Grove lazy-clone (NFS macOS / FUSE Linux). Gated `[clone] enabled = true` in Grove config. Default **depth-1** selected branch; `--full-history` for full clone; `--branch` / `--cone`. 1.0.10+ can reuse a matching local checkout as a linked worktree. |
 | `grok memory clear` | Cross-session memory (`--workspace` / `--global` / `--all` / `-y`) |
 | `grok agent stdio` | ACP long-lived integration (most hosts stay on `-p`) |

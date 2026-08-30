@@ -2,6 +2,12 @@
 
 ## v3.1 — 2026-08-30
 
+### Docs audit (code match)
+
+- Project hub [`AGENTS.md`](./AGENTS.md) + `docs/` (vision, architecture, requirements, roadmap, feature packs, living-claims matrix) inferred from this tree — **code wins**.
+- README compatibility/manual paths now list all **four** installer destinations; project-local trigger is `.git` **or** `.grok/config.toml`.
+- `references/flags-1.0.md`: `--no-auto-update` is live but omitted from default `grok --help` (completions), same as the other hidden flags.
+
 ### Skill 3.1 / Grok Build CLI 1.0.13+
 
 Accuracy bump against live `grok 1.0.13` (`grok --version`, `grok models`, `grok doctor`, completions, local `~/.grok/docs/user-guide/`). Skill stays **3.x**. Slim `SKILL.md` entrypoint + the same **six** references (`flags-1.0.md`, `output-formats.md`, `sessions-and-resume.md`, `failure-modes.md`, `quality-without-best-of-n.md`, `prompt-templates.md`).

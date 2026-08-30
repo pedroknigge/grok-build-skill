@@ -1,7 +1,7 @@
 3b7189f1e461c883ab65c95e1214636e67b6e3dd451404620518d8aba49c62db  install.sh
 9f2b070bc9887752bda7f8cbfb8dfed4790222dd8b55e4007d584cbec4576269  skills/grok-build/SKILL.md
 609a17a55d4a6284aedb7d47ab104dbf43bdd2f1aa10ec64129aab9e9f400a0d  skills/grok-build/references/failure-modes.md
-b243fadce2f93485e971c8c9a32e71176b6e1592594afe9e8032590f4a6b3b90  skills/grok-build/references/flags-1.0.md
+42dfdc8284caeda0a163fa576bb891624fb283414824ea7d7691e586b2a30996  skills/grok-build/references/flags-1.0.md
 7a350b724839691a5f233ffe9cf0767d60e0bc70f7c4e35384ccf626691f5bb7  skills/grok-build/references/output-formats.md
 ca9557414e7c95bca9e50946e41982b7dfe5e1491c769021cadc0fc299177141  skills/grok-build/references/prompt-templates.md
 20a81ec5f8db8e4a0c231fcc77e4be8fe99f7ce55f697dda6b95c6586b65b078  skills/grok-build/references/quality-without-best-of-n.md

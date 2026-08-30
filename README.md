@@ -4,6 +4,8 @@ A drop-in **skill** that teaches Claude Code, Grok Build, Codex, or any agent th
 
 **Skill 3.1** targets **Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13`). Default model **`grok-4.6`**; **`grok-4.5` is still available**.
 
+Agent hub for this repo: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
+
 Once installed, the host agent learns:
 
 **CLI delegation patterns**
@@ -35,7 +37,9 @@ cd grok-build-skill
 # or explicit root: GROK_BUILD_SKILL_ROOT=$PWD ./install.sh
 ```
 
-The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `references/`) into detected agents. It hard-fails if any shipped reference is missing. Local tree is used only when `install.sh` is a real on-disk script that contains `skills/grok-build/SKILL.md`, or when `GROK_BUILD_SKILL_ROOT` is set — `curl | bash` always uses `REPO_RAW` (not CWD).
+The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `references/`) into detected agents. It hard-fails if any shipped reference is missing. Local tree is used only when `install.sh` is a real on-disk script whose directory contains `skills/grok-build/SKILL.md`, or when `GROK_BUILD_SKILL_ROOT` is set — `curl | bash` always uses `REPO_RAW` (not CWD).
+
+Project-local install writes `.grok/skills/grok-build/` when the current directory has `.git` **or** `.grok/config.toml` (either trigger is enough).
 
 **Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.1)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.0.0` one-liners will not move until a new tag/release.
 
@@ -68,9 +72,13 @@ cp -R skills/grok-build/* ~/.claude/skills/grok-build/
 # Grok user skills
 mkdir -p ~/.grok/skills/grok-build
 cp -R skills/grok-build/* ~/.grok/skills/grok-build/
+
+# Project-local (when the repo has .git or .grok/config.toml)
+mkdir -p .grok/skills/grok-build
+cp -R skills/grok-build/* .grok/skills/grok-build/
 ```
 
-Codex: the installer embeds `SKILL.md` into `~/.codex/AGENTS.md` between markers (references path noted in the block).
+Codex: the installer embeds `SKILL.md` into `~/.codex/AGENTS.md` between markers (references path noted in the block). It does **not** write `~/.codex/skills/grok-build`.
 
 ## What the skill teaches
 
@@ -108,8 +116,9 @@ This skill focuses on the logged-in headless flow. `XAI_API_KEY` is only a fallb
 | Agent | Loads from | Invocation |
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills/grok-build/` | `/grok-build` |
-| Grok Build | `~/.grok/skills/` or `~/.claude/skills/` | `/grok-build` |
-| Codex CLI | `~/.codex/AGENTS.md` | Auto-context |
+| Grok Build (user) | `~/.grok/skills/grok-build/` | `/grok-build` |
+| Grok Build (project) | `.grok/skills/grok-build/` | `/grok-build` (when `.git` or `.grok/config.toml` is present) |
+| Codex CLI | `~/.codex/AGENTS.md` (embedded block) | Auto-context |
 | Other `SKILL.md` hosts | agent skill dirs | varies |
 
 ## License
@@ -118,13 +127,14 @@ MIT — see [`LICENSE`](./LICENSE).
 
 ## Contributing
 
-Keep the skill **short, accurate, and high-signal** for CLI **1.0.13+**.
+Keep the skill **short, accurate, and high-signal** for CLI **1.0.13+**. Agent hub: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
 
 When updating:
 - Edit `skills/grok-build/SKILL.md` (entrypoint) and/or `references/*` (six files; no 7th unless flags overflows)
 - Do **not** teach `--best-of-n`, `--check`, `--self-verify` as live flags
 - Model fallback: **`grok-4.6`** (keep a **`grok-4.5`** mention — still available). Never primary `echo grok-build`. grok-4.6 extra effort: **`xhigh`**
 - Bump frontmatter `version` / `last-updated` and `CHANGELOG.md`
+- If architecture or install destinations change, update `AGENTS.md` and `docs/`
 - Run:
   ```bash
   ./scripts/validate-skill.sh

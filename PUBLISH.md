@@ -55,9 +55,10 @@ Stage **explicit paths only**. Do **not** `git add .` (that can leak `.orderfiel
 git add \
   skills/grok-build/SKILL.md \
   skills/grok-build/references/*.md \
-  README.md CHANGELOG.md PUBLISH.md install.sh \
+  README.md CHANGELOG.md PUBLISH.md AGENTS.md install.sh \
   scripts/validate-skill.sh scripts/install-smoke.sh scripts/sync-check-cli.sh \
-  SHA256SUMS .gitignore
+  SHA256SUMS .gitignore \
+  docs/
 git commit -m "v3.1: Align grok-build skill with Grok Build CLI 1.0.13"
 git push origin main
 ```
