@@ -30,7 +30,8 @@ Fail the tree when the skill teaches a dead CLI contract, the installer regresse
 
 - [x] Validate requires version 3.x, required concepts, six refs, dead-flag ban, UUID sessions
 - [x] Smoke uses `FAKE_HOME` + `GROK_BUILD_SKILL_ROOT`; never original `$HOME`
-- [x] Smoke asserts full refs on Claude/Grok/project and Codex contract strings
+- [x] Smoke asserts full refs on Claude/Grok/project/both AGY roots and Codex contract strings
+- [x] Smoke asserts AGY uninstall and that `.agy/skills` is never created
 - [x] `sync-check-cli.sh` skips (exit 0) when `grok` is missing
 - [x] CI: validate, `shasum -a 256 -c SHA256SUMS`, smoke, optional sync
 

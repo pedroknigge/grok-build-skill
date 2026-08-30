@@ -27,13 +27,13 @@ Do not re-narrate those files here.
 
 ## Users & success
 
-- **Primary users:** Host agents invoking `/grok-build` or reading Codex `AGENTS.md`
+- **Primary users:** Host agents, including AGY, invoking `/grok-build` or reading Codex `AGENTS.md`
 - **Success metrics:** `./scripts/validate-skill.sh` passes; live `grok models` still lists the documented fallback
 - **Out of scope:** TUI chrome, dashboard/OTEL, wrapping `grok` as a library
 
 ## Acceptance criteria
 
-- [x] Frontmatter `version: "3.1"` and `last-updated: "2026-08-30"`
+- [x] Frontmatter `version: "3.2"` and `last-updated: "2026-08-30"`
 - [x] Entrypoint ≤220 lines (currently 214)
 - [x] Default model string `grok-4.6`; `grok-4.5` mentioned
 - [x] Headless worktree caveat: `-p` does not create a worktree from `--worktree`

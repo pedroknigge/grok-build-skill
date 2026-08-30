@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # validate-skill.sh
-# Contract-aware validator for the grok-build skill (v3.1 / CLI 1.0.13+).
+# Contract-aware validator for the grok-build skill (v3.2 / CLI 1.0.13+).
 #
 # Usage: ./scripts/validate-skill.sh [path-to-SKILL.md]
 set -euo pipefail

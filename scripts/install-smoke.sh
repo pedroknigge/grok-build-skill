@@ -34,7 +34,11 @@ ORIGINAL_HOME="${HOME:-}"
 
 # Work entirely under temp + FAKE_HOME (never real HOME)
 FAKE_HOME="$TMPDIR/fakehome"
-mkdir -p "$FAKE_HOME/.grok" "$FAKE_HOME/.claude" "$FAKE_HOME/.codex"
+mkdir -p \
+  "$FAKE_HOME/.grok" \
+  "$FAKE_HOME/.claude" \
+  "$FAKE_HOME/.codex" \
+  "$FAKE_HOME/.gemini/config"
 
 # Project-local install context (git repo) under TMPDIR
 PROJECT="$TMPDIR/project"
@@ -104,7 +108,13 @@ fi
 # Full reference set for every agent target
 assert_full_skill_dir "$FAKE_HOME/.grok/skills/grok-build" "Grok user"
 assert_full_skill_dir "$FAKE_HOME/.claude/skills/grok-build" "Claude Code"
+assert_full_skill_dir "$FAKE_HOME/.gemini/config/skills/grok-build" "AGY global"
+assert_full_skill_dir "$FAKE_HOME/.gemini/antigravity-cli/skills/grok-build" "AGY CLI"
 assert_full_skill_dir "$PROJECT/.grok/skills/grok-build" "project-local"
+if [[ -e "$FAKE_HOME/.agy" ]]; then
+  echo "FAIL: installer invented unsupported $FAKE_HOME/.agy"
+  exit 1
+fi
 
 if ! grep -q "BEGIN grok-build skill" "$FAKE_HOME/.codex/AGENTS.md" 2>/dev/null; then
   echo "FAIL: codex AGENTS.md block not present"
@@ -167,6 +177,8 @@ fi
 # Refs still complete after reinstall
 assert_full_skill_dir "$FAKE_HOME/.grok/skills/grok-build" "Grok user (reinstall)"
 assert_full_skill_dir "$FAKE_HOME/.claude/skills/grok-build" "Claude Code (reinstall)"
+assert_full_skill_dir "$FAKE_HOME/.gemini/config/skills/grok-build" "AGY global (reinstall)"
+assert_full_skill_dir "$FAKE_HOME/.gemini/antigravity-cli/skills/grok-build" "AGY CLI (reinstall)"
 assert_full_skill_dir "$PROJECT/.grok/skills/grok-build" "project-local (reinstall)"
 
 echo "✓ Idempotent re-run succeeded (Codex block not duplicated)"
@@ -183,8 +195,20 @@ if [[ -f "$FAKE_HOME/.claude/skills/grok-build/SKILL.md" ]] || [[ -d "$FAKE_HOME
   echo "FAIL: claude skill still present after uninstall"
   exit 1
 fi
+if [[ -d "$FAKE_HOME/.gemini/config/skills/grok-build" ]]; then
+  echo "FAIL: AGY global skill still present after uninstall"
+  exit 1
+fi
+if [[ -d "$FAKE_HOME/.gemini/antigravity-cli/skills/grok-build" ]]; then
+  echo "FAIL: AGY CLI skill still present after uninstall"
+  exit 1
+fi
 if [[ -f "$PROJECT/.grok/skills/grok-build/SKILL.md" ]] || [[ -d "$PROJECT/.grok/skills/grok-build" ]]; then
   echo "FAIL: project skill still present after uninstall"
+  exit 1
+fi
+if [[ -e "$FAKE_HOME/.agy" ]]; then
+  echo "FAIL: uninstall left unsupported $FAKE_HOME/.agy"
   exit 1
 fi
 if grep -q "BEGIN grok-build skill" "$FAKE_HOME/.codex/AGENTS.md" 2>/dev/null; then

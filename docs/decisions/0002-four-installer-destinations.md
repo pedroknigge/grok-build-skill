@@ -1,6 +1,6 @@
 # ADR-0002: Four installer destinations (Codex via AGENTS.md)
 
-**Status:** Accepted — inferred from code  
+**Status:** Superseded by [ADR-0003](./0003-native-agy-destinations.md)
 **Date:** 2026-08-30  
 **Tags:** architecture, distribution
 
@@ -38,3 +38,4 @@ Re-runs overwrite dirs and replace the Codex block in place (`strip_block`). `--
 - Architecture: [../architecture.md](../architecture.md)
 - Feature: [../features/installer/README.md](../features/installer/README.md)
 - Publish: [../../PUBLISH.md](../../PUBLISH.md)
+- Superseding decision: [ADR-0003](./0003-native-agy-destinations.md)

@@ -1,5 +1,14 @@
 # Changelog
 
+## v3.2 — 2026-08-30
+
+### Native Antigravity / AGY packaging
+
+- Added global skill installs at `~/.gemini/config/skills/grok-build/` and `~/.gemini/antigravity-cli/skills/grok-build/` when `agy` is on PATH or the corresponding Gemini config root exists.
+- AGY receives the complete skill directory (`SKILL.md` + all six references); reinstall overwrites idempotently and `--uninstall` removes both exact children. The installer never creates `~/.agy/skills`.
+- Installer smoke coverage now verifies first install, reinstall, complete references, uninstall, and absence of `.agy` for both AGY destinations under `FAKE_HOME`.
+- Documented AGY slash-command and semantic discovery, bumped skill metadata/install banners to 3.2, and retained the Grok Build CLI 1.0.13+ contract unchanged.
+
 ## v3.1 — 2026-08-30
 
 ### Docs audit (code match)

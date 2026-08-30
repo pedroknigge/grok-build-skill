@@ -6,7 +6,7 @@ allowed-tools: run_terminal_command
 argument-hint: the prompt or task to send to grok
 user-invocable: true
 metadata:
-  version: "3.1"
+  version: "3.2"
   last-updated: "2026-08-30"
   focus: "CLI delegation for Grok Build CLI 1.0.13+. Headless contract (dead flags removed), worktree caveat, streaming-messages-json, resume/restore-code, model default grok-4.6 (grok-4.5 still available), host-side quality. Assumes grok install + auth."
 ---
@@ -37,7 +37,7 @@ Use the `grok` CLI when you want to **delegate** work to a separate Grok agent w
 - MCP integrations: `search_tool` then `use_tool`
 - Long ops: background shell + monitor primitives
 
-**Still use `grok -p` when you want:** a separate model/context, auditable CLI output from Claude/Codex/scripts, multi-turn UUID sessions, or features easiest as a full Grok prompt.
+**Still use `grok -p` when you want:** a separate model/context, auditable CLI output from Claude/Codex/AGY/scripts, multi-turn UUID sessions, or features easiest as a full Grok prompt.
 
 Compose both: native orchestration first; CLI when a dedicated Grok session adds value.
 

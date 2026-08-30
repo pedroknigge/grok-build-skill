@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v3.1 (idempotent)
+# grok-build skill installer — v3.2 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 # Or, from a local clone (recommended for development):
@@ -9,8 +9,8 @@
 #   GROK_BUILD_SKILL_ROOT=/path/to/clone ./install.sh
 #   GROK_BUILD_SKILL_RAW=https://raw.githubusercontent.com/.../main ./install.sh  # remote base
 #
-# Re-running this script is safe: Claude Code & Grok skill directories are overwritten,
-# and the Codex AGENTS.md block is replaced in place (no duplication).
+# Re-running this script is safe: Claude Code, Grok, and AGY skill directories are
+# overwritten, and the Codex AGENTS.md block is replaced in place (no duplication).
 #
 # Installs the full skills/grok-build/ directory (SKILL.md + references/).
 # Install fails hard if any shipped reference file is missing.
@@ -145,6 +145,12 @@ remove_skill_dir() {
   return 1
 }
 
+agy_dests() {
+  printf '%s\n' \
+    "$HOME/.gemini/config/skills/grok-build" \
+    "$HOME/.gemini/antigravity-cli/skills/grok-build"
+}
+
 fetch_skill_stdout() {
   if [[ -n "$SKILL_ROOT" && -f "$SKILL_ROOT/$SKILL_MD" ]]; then
     cat "$SKILL_ROOT/$SKILL_MD"
@@ -187,7 +193,7 @@ removed_any=0
 if [[ "$UNINSTALL" -eq 1 ]]; then
   cyan "→ grok-build skill uninstaller"
 else
-  cyan "→ grok-build skill installer (v3.1 / Grok Build CLI 1.0.13+ — idempotent)"
+  cyan "→ grok-build skill installer (v3.2 / Grok Build CLI 1.0.13+ — idempotent)"
   if [[ -n "$SKILL_ROOT" ]]; then
     cyan "  source: local tree $SKILL_ROOT"
   else
@@ -224,6 +230,25 @@ if command -v grok >/dev/null 2>&1 || [[ -d "$HOME/.grok" ]]; then
     installed_any=1
   fi
 fi
+
+# ─── Antigravity (AGY, global) ─────────────────────────────────────────────────
+agy_detected=0
+if command -v agy >/dev/null 2>&1 \
+  || [[ -d "$HOME/.gemini/config" || -d "$HOME/.gemini/antigravity-cli" ]]; then
+  agy_detected=1
+fi
+while IFS= read -r target_dir; do
+  if [[ "$UNINSTALL" -eq 1 ]]; then
+    if remove_skill_dir "$target_dir"; then
+      green "✓ Removed from Antigravity (AGY) → $target_dir"
+      removed_any=1
+    fi
+  elif [[ "$agy_detected" -eq 1 ]]; then
+    install_skill_dir "$target_dir"
+    green "✓ Installed for Antigravity (AGY) → $target_dir/SKILL.md (+ references/)"
+    installed_any=1
+  fi
+done < <(agy_dests)
 
 # ─── Grok Build (project-local, if inside a git repo with .grok) ──────────────
 if [[ -d ".git" || -f ".grok/config.toml" ]]; then
@@ -283,13 +308,13 @@ if [[ "$UNINSTALL" -eq 1 ]]; then
 fi
 
 if [[ "$installed_any" -eq 0 ]]; then
-  yellow "No supported agent detected (claude / grok / codex)."
+  yellow "No supported agent detected (claude / grok / agy / codex)."
   yellow "Install the skill manually by copying $SKILL_REL/ to your agent's skill directory."
   exit 1
 fi
 
-cyan "→ Done. Invoke with /grok-build (Claude Code, Grok) or auto-loaded in Codex."
-cyan "  Skill 3.1 targets Grok Build CLI 1.0.13+ (dead flags removed; default model grok-4.6)."
+cyan "→ Done. Invoke with /grok-build (Claude Code, Grok, AGY) or auto-loaded in Codex."
+cyan "  Skill 3.2 targets Grok Build CLI 1.0.13+ (dead flags removed; default model grok-4.6)."
 cyan "  Tip: re-run this script (or ./install.sh from a clone) anytime to update."
 cyan "  For project-local skills: the installer also writes to .grok/skills/ when run inside a git repo."
 cyan "  To remove: ./install.sh --uninstall"

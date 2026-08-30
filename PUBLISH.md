@@ -2,7 +2,7 @@
 
 Origin already exists: [pedroknigge/grok-build-skill](https://github.com/pedroknigge/grok-build-skill). This is a **bump → checksum → push → optional tag** recipe, not a first-create bootstrap (`git init` / `gh repo create` / `<your-user>`).
 
-Target surface for consumers: **Grok Build CLI 1.0.13+**, skill version **3.1**.
+Target surface for consumers: **Grok Build CLI 1.0.13+**, skill version **3.2**.
 
 ## Gate (must pass before push)
 
@@ -22,8 +22,9 @@ Do **not** publish until validate + install-smoke pass. Do **not** run `./instal
 2. Keep SKILL.md slim (≤220 lines); new tables go in `references/flags-1.0.md`.
 3. Bump frontmatter `version` (stay 3.x) and `last-updated`.
 4. Update `CHANGELOG.md`, `README.md`, and installer banners in the same change.
-5. Model fallback: **`grok-4.6`**. Keep a **`grok-4.5`** mention (still available) so validators pass.
-6. Do not teach `--best-of-n`, `--check`, or `--self-verify` as live `-p` flags.
+5. Keep both AGY destinations documented and tested: `~/.gemini/config/skills/grok-build` and `~/.gemini/antigravity-cli/skills/grok-build`; never `~/.agy/skills`.
+6. Model fallback: **`grok-4.6`**. Keep a **`grok-4.5`** mention (still available) so validators pass.
+7. Do not teach `--best-of-n`, `--check`, or `--self-verify` as live `-p` flags.
 
 ## Checksums
 
@@ -59,7 +60,7 @@ git add \
   scripts/validate-skill.sh scripts/install-smoke.sh scripts/sync-check-cli.sh \
   SHA256SUMS .gitignore \
   docs/
-git commit -m "v3.1: Align grok-build skill with Grok Build CLI 1.0.13"
+git commit -m "v3.2: Add native AGY skill installation"
 git push origin main
 ```
 
@@ -73,27 +74,38 @@ Until that push lands, the curl one-liner still serves whatever is already on `o
 
 ## Optional tag / GitHub release
 
-Tag-pinned consumers of **v3.0.0** will **not** move on a `main` push:
+Tag-pinned consumers of **v3.1.0** will **not** move on a `main` push:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/v3.0.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/v3.1.0/install.sh | bash
 ```
 
-Cut a new tag/release (deliver may use **`v3.1.0`**) so those URLs can move:
+Cut a new tag/release (deliver may use **`v3.2.0`**) so those URLs can move:
 
 ```bash
-git tag v3.1.0
-git push origin v3.1.0
-gh release create v3.1.0 --title "v3.1.0" --notes "Skill 3.1 for Grok Build CLI 1.0.13+ (default grok-4.6)."
+git tag v3.2.0
+git push origin v3.2.0
+gh release create v3.2.0 --title "v3.2.0" --notes "Skill 3.2 adds native AGY discovery and keeps the Grok Build CLI 1.0.13+ contract."
 ```
 
 Keep the README public one-liner on `main`, not the tag.
 
 ## After origin is updated
 
-Run `./install.sh` from this clone (local tree, not curl|bash) so Claude, Grok user skills, project-local `.grok/skills`, and Codex `AGENTS.md` refresh. The installer has **four** destinations; it does **not** replace `~/.codex/skills/grok-build`.
+Run `./install.sh` from this clone (local tree, not curl|bash) so Claude, Grok user skills, both AGY global roots, project-local `.grok/skills`, and Codex `AGENTS.md` refresh. The installer has **six** destinations; it does **not** replace `~/.codex/skills/grok-build` and never creates `~/.agy/skills`.
+
+Verify the AGY copies after that install:
+
+```bash
+test -f ~/.gemini/config/skills/grok-build/SKILL.md
+test -f ~/.gemini/antigravity-cli/skills/grok-build/SKILL.md
+diff -qr skills/grok-build ~/.gemini/config/skills/grok-build
+diff -qr skills/grok-build ~/.gemini/antigravity-cli/skills/grok-build
+test ! -e ~/.agy/skills/grok-build
+```
 
 ## Discoverability
 
-- Skills are auto-discovered from `~/.grok/skills/`, `~/.claude/skills/`, project `.grok/skills/`, and additional paths in `~/.grok/config.toml`.
+- Grok skills are auto-discovered from `~/.grok/skills/`, project `.grok/skills/`, and additional paths in `~/.grok/config.toml`; Claude reads `~/.claude/skills/`.
+- AGY discovers global skills from `~/.gemini/config/skills/`; `~/.gemini/antigravity-cli/skills/` is the CLI compatibility mirror. Both provide `/grok-build` and semantic discovery.
 - Re-running the installer (or `grok inspect`) will pick up updates quickly.

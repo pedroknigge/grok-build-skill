@@ -1,8 +1,8 @@
 # grok-build skill
 
-A drop-in **skill** that teaches Claude Code, Grok Build, Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, ACP, **and when to prefer native Grok tools** instead of shelling out.
+A drop-in **skill** that teaches Claude Code, Grok Build, Antigravity (`agy`), Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, ACP, **and when to prefer native Grok tools** instead of shelling out.
 
-**Skill 3.1** targets **Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13`). Default model **`grok-4.6`**; **`grok-4.5` is still available**.
+**Skill 3.2** targets **Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13`). Default model **`grok-4.6`**; **`grok-4.5` is still available**.
 
 Agent hub for this repo: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
 
@@ -37,13 +37,13 @@ cd grok-build-skill
 # or explicit root: GROK_BUILD_SKILL_ROOT=$PWD ./install.sh
 ```
 
-The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `references/`) into detected agents. It hard-fails if any shipped reference is missing. Local tree is used only when `install.sh` is a real on-disk script whose directory contains `skills/grok-build/SKILL.md`, or when `GROK_BUILD_SKILL_ROOT` is set — `curl | bash` always uses `REPO_RAW` (not CWD).
+The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `references/`) into detected agents, including both global AGY skill roots. It hard-fails if any shipped reference is missing. Local tree is used only when `install.sh` is a real on-disk script whose directory contains `skills/grok-build/SKILL.md`, or when `GROK_BUILD_SKILL_ROOT` is set — `curl | bash` always uses `REPO_RAW` (not CWD).
 
 Project-local install writes `.grok/skills/grok-build/` when the current directory has `.git` **or** `.grok/config.toml` (either trigger is enough).
 
-**Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.1)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.0.0` one-liners will not move until a new tag/release.
+**Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.2)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.1.0` one-liners will not move until a new tag/release.
 
-**Re-running is safe** — idempotent overwrite for Claude/Grok; Codex `AGENTS.md` block is replaced in place (no duplication).
+**Re-running is safe** — idempotent overwrite for Claude/Grok/AGY; Codex `AGENTS.md` block is replaced in place (no duplication).
 
 **Uninstall:**
 
@@ -72,6 +72,12 @@ cp -R skills/grok-build/* ~/.claude/skills/grok-build/
 # Grok user skills
 mkdir -p ~/.grok/skills/grok-build
 cp -R skills/grok-build/* ~/.grok/skills/grok-build/
+
+# Antigravity / AGY global skills (canonical + CLI compatibility mirror)
+mkdir -p ~/.gemini/config/skills/grok-build
+cp -R skills/grok-build/* ~/.gemini/config/skills/grok-build/
+mkdir -p ~/.gemini/antigravity-cli/skills/grok-build
+cp -R skills/grok-build/* ~/.gemini/antigravity-cli/skills/grok-build/
 
 # Project-local (when the repo has .git or .grok/config.toml)
 mkdir -p .grok/skills/grok-build
@@ -118,6 +124,7 @@ This skill focuses on the logged-in headless flow. `XAI_API_KEY` is only a fallb
 | Claude Code | `~/.claude/skills/grok-build/` | `/grok-build` |
 | Grok Build (user) | `~/.grok/skills/grok-build/` | `/grok-build` |
 | Grok Build (project) | `.grok/skills/grok-build/` | `/grok-build` (when `.git` or `.grok/config.toml` is present) |
+| Antigravity (`agy`) | `~/.gemini/config/skills/grok-build/` + `~/.gemini/antigravity-cli/skills/grok-build/` | `/grok-build` + semantic discovery |
 | Codex CLI | `~/.codex/AGENTS.md` (embedded block) | Auto-context |
 | Other `SKILL.md` hosts | agent skill dirs | varies |
 

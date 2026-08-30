@@ -15,7 +15,7 @@
 
 | Verdict | Count |
 |---------|------:|
-| OK | 32 |
+| OK | 33 |
 | Partial | 0 |
 | Missing | 0 |
 | Contradicted | 0 |
@@ -23,10 +23,10 @@
 
 | Severity | Count |
 |----------|------:|
-| critical | 15 |
+| critical | 16 |
 | normal | 20 |
 
-**Truth score (advisory):** `(32*100 + 0*50) / 35` ≈ **91.4** (Unverifiable counted in TOTAL_V)  
+**Truth score (advisory):** `(33*100 + 0*50) / 36` ≈ **91.7** (Unverifiable counted in TOTAL_V)
 **CI gate:** this repo has **no** `scripts/audit-claims.sh`. Gate here is `validate-skill.sh` + smoke + checksums. No **critical Contradicted**.
 
 **Top risks (pre-patch, now fixed in-tree):**  
@@ -54,7 +54,7 @@
 
 | ID | Claim (quote or paraphrase) | Source doc | Code evidence | Anchor path | Anchor symbol | Anchor hash | Severity | Verdict | Action |
 |----|----------------------------|------------|---------------|-------------|---------------|-------------|----------|---------|--------|
-| C-001 | Skill metadata version is 3.x / 3.1 | SKILL.md frontmatter | `version: "3.1"` | `skills/grok-build/SKILL.md` | `metadata.version` | | critical | OK | keep |
+| C-001 | Skill metadata version is 3.x / 3.2 | SKILL.md frontmatter | `version: "3.2"` | `skills/grok-build/SKILL.md` | `metadata.version` | | critical | OK | keep |
 | C-002 | Entrypoint ≤220 lines | README / PUBLISH | `wc -l` → 214 | `skills/grok-build/SKILL.md` | | | normal | OK | keep |
 | C-003 | Exactly six reference files with those names | README, install.sh | `REFERENCE_FILES` + dir listing | `install.sh` | `REFERENCE_FILES` | | critical | OK | keep |
 | C-004 | Target surface Grok Build CLI 1.0.13+ | SKILL.md, README | frontmatter focus; live `grok 1.0.13` | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
@@ -67,7 +67,7 @@
 | C-011 | `--restore-code` requires `--resume`; remote needs `--worktree` | SKILL.md | `grok --help` restore-code text | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
 | C-012 | Permission modes: default, acceptEdits, auto, dontAsk, bypassPermissions, plan | flags-1.0.md | `grok --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-013 | `grok login --device-auth` alias `--device-code` | SKILL.md | `grok login --help` | `skills/grok-build/SKILL.md` | | | normal | OK | keep |
-| C-014 | Installer has four destinations; not `~/.codex/skills/grok-build` | PUBLISH.md, install.sh | four blocks in `install.sh`; no codex/skills path | `install.sh` | | | critical | OK | keep |
+| C-014 | Installer has six destinations, including two AGY roots; not `~/.codex/skills/grok-build` | PUBLISH.md, install.sh | AGY loop plus existing four surfaces; no codex/skills path | `install.sh` | `agy_dests` | | critical | OK | keep |
 | C-015 | Project-local dest when `.git` or `.grok/config.toml` | install.sh | condition at project-local block | `install.sh` | | | normal | OK | keep (README patched) |
 | C-016 | `curl \| bash` uses `REPO_RAW`, not CWD as skill root | README, install.sh | `resolve_skill_root` | `install.sh` | `resolve_skill_root` | | critical | OK | keep |
 | C-017 | Hard-fail if shipped reference missing/empty | README, install.sh | `require_references` | `install.sh` | `require_references` | | critical | OK | keep |
@@ -89,6 +89,7 @@
 | C-033 | `grok clone` Grove lazy-clone; gated Grove config; depth-1 default | flags-1.0.md | `grok clone --help` confirms flags; Grove gate not executed | `skills/grok-build/references/flags-1.0.md` | | | normal | Unverifiable | keep (help OK; gate Unverifiable) |
 | C-034 | Worktree cleanup recipes are list/rm/gc; salvage / clean-artifacts / db exist and are not recipes | flags-1.0.md | `grok worktree --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-035 | `--tools` / `--max-turns` / `--agents` are headless-only (user-guide); default `--help` omits that label | flags-1.0.md | user-guide 14-headless-mode.md; flags table notes help omission | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-036 | AGY uses `~/.gemini/config/skills/grok-build` and `~/.gemini/antigravity-cli/skills/grok-build`; never `~/.agy/skills` | README, PUBLISH, ADR-0003 | installer destinations + FAKE_HOME smoke assertions | `install.sh` | `agy_dests` | | critical | OK | keep |
 
 ### Living-claims columns
 
@@ -103,6 +104,8 @@
 
 ## Session patches (integrate follow-on)
 
+### v3.1 documentation audit
+
 - README: four dest + project-local trigger + Codex non-dest
 - `references/flags-1.0.md`: `--no-auto-update` in omitted-from-help list
 - Created `AGENTS.md` + `docs/**` from code
@@ -110,6 +113,10 @@
 - CHANGELOG v3.1 docs-audit note
 
 **Non-writes:** `LICENSE`; `SKILL.md` body (contract already OK); historical CHANGELOG entries before v3.1; `install.sh` / scripts logic.
+
+### v3.2 AGY follow-on
+
+- Native AGY destinations, smoke coverage, ADR-0003, and release metadata
 
 ## Follow-on plan
 

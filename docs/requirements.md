@@ -14,15 +14,16 @@ Inferred from **code** (installer, scripts, skill files). Evidence column is the
 | RF-005 | Operational recipes must not pass `--best-of-n`, `--self-verify`, or `grok … --check` | `validate-skill.sh` `fail_operational_dead_flags` | grok-build-skill |
 | RF-006 | No nickname `-s` examples (`img-session`, `feat-123`, `feat-xyz`); create uses UUID | `validate-skill.sh` | grok-build-skill |
 | RF-007 | Primary model fallback is not `echo grok-build` | `validate-skill.sh` | grok-build-skill |
-| RF-008 | Installer copies full skill dir to Claude, Grok user, and project-local; embeds SKILL into Codex `AGENTS.md` | `install.sh` | [installer](./features/installer/README.md) |
+| RF-008 | Installer copies full skill dir to Claude, Grok user, project-local, and both AGY global roots; embeds SKILL into Codex `AGENTS.md` | `install.sh` | [installer](./features/installer/README.md) |
 | RF-009 | Project-local dest when `.git` **or** `.grok/config.toml` | `install.sh` | installer |
 | RF-010 | `curl \| bash` must not treat CWD as skill root; `GROK_BUILD_SKILL_ROOT` / on-disk script only | `install.sh` `resolve_skill_root` | installer |
 | RF-011 | Missing or empty shipped reference after install is a hard fail | `install.sh` `require_references` | installer |
-| RF-012 | Re-install is idempotent (Codex BEGIN/END count stays 1); uninstall removes all four dest | `scripts/install-smoke.sh` | installer |
+| RF-012 | Re-install is idempotent (Codex BEGIN/END count stays 1); uninstall removes all six dest | `scripts/install-smoke.sh` | installer |
 | RF-013 | Smoke test never writes the real `$HOME` | `scripts/install-smoke.sh` `FAKE_HOME` | [validation-ci](./features/validation-ci/README.md) |
 | RF-014 | `SHA256SUMS` covers `install.sh`, `SKILL.md`, and the six references | `SHA256SUMS`; CI step | installer |
 | RF-015 | CI runs validate, checksum verify, smoke, optional live sync | `.github/workflows/ci.yml` | validation-ci |
 | RF-016 | Optional live sync exits 0 if `grok` is absent; fails if dead flags reappear in `--help` or required live flags disappear | `scripts/sync-check-cli.sh` | validation-ci |
+| RF-017 | AGY installs as direct children of `~/.gemini/config/skills` and `~/.gemini/antigravity-cli/skills`; never `~/.agy/skills` | `install.sh`; `scripts/install-smoke.sh` | installer |
 
 ## NFR
 

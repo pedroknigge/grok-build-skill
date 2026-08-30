@@ -3,12 +3,12 @@
 > Hub for this repository. Read this file and the linked docs before significant work. Update them when install destinations, the skill contract, or CLI targeting change.  
 > **Code is the source of truth** for how the installer, validators, and skill files behave. These documents capture *what* and *why*. On conflict, **code wins** — fix or flag the doc.
 
-**Status:** Shipped (skill **3.1** / Grok Build CLI **1.0.13+**, default model **`grok-4.6`**)  
+**Status:** Shipped (skill **3.2** / Grok Build CLI **1.0.13+**, default model **`grok-4.6`**)
 **Last updated:** 2026-08-30
 
 ## Project Overview
 
-Drop-in Agent Skill that teaches host agents (Claude Code, Grok Build, Codex, and any `SKILL.md` host) how to drive the **xAI Grok Build CLI** in **headless** mode (`grok -p`), including `/imagine`, sessions, streaming JSON, and when to prefer **native host tools** instead of shelling out.
+Drop-in Agent Skill that teaches host agents (Claude Code, Grok Build, Antigravity/AGY, Codex, and any `SKILL.md` host) how to drive the **xAI Grok Build CLI** in **headless** mode (`grok -p`), including `/imagine`, sessions, streaming JSON, and when to prefer **native host tools** instead of shelling out.
 
 This repo is **not** an application. Runtime is POSIX bash + Markdown. There is no `package.json` / `pyproject.toml` / `go.mod`.
 
@@ -46,6 +46,8 @@ Canonical **product** surface (what hosts load): [`skills/grok-build/SKILL.md`](
 | `scripts/sync-check-cli.sh` | [validation-ci](./docs/features/validation-ci/README.md) | [validation-ci](./docs/features/validation-ci/README.md) | Real | |
 | `.github/workflows/ci.yml` | [validation-ci](./docs/features/validation-ci/README.md) | [validation-ci](./docs/features/validation-ci/README.md) | Real | |
 | `SHA256SUMS` | [PUBLISH.md](./PUBLISH.md) | [installer](./docs/features/installer/README.md) | Real | |
+| `~/.gemini/config/skills/grok-build` | [README.md](./README.md) · [PUBLISH.md](./PUBLISH.md) | [installer](./docs/features/installer/README.md) | Real | |
+| `~/.gemini/antigravity-cli/skills/grok-build` | [README.md](./README.md) · [PUBLISH.md](./PUBLISH.md) | [installer](./docs/features/installer/README.md) | Real | |
 | `~/.codex/skills/grok-build` | [PUBLISH.md](./PUBLISH.md) | [installer](./docs/features/installer/README.md) | Deprecated | **not an installer dest** |
 
 ## Instructions for AI Agents & Contributors
@@ -62,6 +64,6 @@ Canonical **product** surface (what hosts load): [`skills/grok-build/SKILL.md`](
 
 ## Current Status Summary
 
-Skill **3.1** is aligned with live **Grok Build CLI 1.0.13** (verified this session: `grok --version`, `grok models` default `grok-4.6`, `grok-4.5` still listed, `./scripts/validate-skill.sh` + `install-smoke.sh` + `sync-check-cli.sh` + `SHA256SUMS` pass). Headless quality flags from skill 2.5 are dead. Installer has **four** destinations.
+Skill **3.2** is aligned with live **Grok Build CLI 1.0.13** and adds native AGY discovery through both global Gemini skill roots. Headless quality flags from skill 2.5 remain dead. Installer has **six** destinations.
 
-_Last updated: 2026-08-30 by documentation-manager audit_
+_Last updated: 2026-08-30 for native AGY packaging_

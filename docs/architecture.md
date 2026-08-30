@@ -18,6 +18,8 @@ flowchart LR
   Installer --> Claude["~/.claude/skills/grok-build/"]
   Installer --> GrokUser["~/.grok/skills/grok-build/"]
   Installer --> Proj[".grok/skills/grok-build/"]
+  Installer --> AgyGlobal["~/.gemini/config/skills/grok-build/"]
+  Installer --> AgyCli["~/.gemini/antigravity-cli/skills/grok-build/"]
   Installer --> Codex["~/.codex/AGENTS.md\nBEGIN/END markers"]
   Host[Host agent] --> SkillDir
   Host --> GrokBin["grok CLI 1.0.13+\nheadless -p"]
@@ -29,7 +31,7 @@ flowchart LR
 |-----------|----------------|-----------|
 | Skill entrypoint | When to use, native vs CLI, preflight, critical recipes | `skills/grok-build/SKILL.md` |
 | Flag / format / session tables | Overflow detail; keep SKILL slim | `skills/grok-build/references/*.md` |
-| Installer | Four destinations; local tree vs `REPO_RAW`; `--uninstall` | `install.sh` |
+| Installer | Six destinations, including two AGY roots; local tree vs `REPO_RAW`; `--uninstall` | `install.sh` |
 | Contract validator | Frontmatter, required concepts, dead-flag ban | `scripts/validate-skill.sh` |
 | Installer smoke | FAKE_HOME only; idempotency + uninstall | `scripts/install-smoke.sh` |
 | Live CLI sync | Optional; skip if `grok` absent | `scripts/sync-check-cli.sh` |
@@ -41,6 +43,7 @@ flowchart LR
 - **Progressive disclosure:** entrypoint ≤220 lines; six named references; no seventh unless `flags-1.0.md` overflows.
 - **Local vs remote install:** on-disk `install.sh` (or `GROK_BUILD_SKILL_ROOT`) copies the tree; `curl | bash` fetches `REPO_RAW` and must **not** treat CWD as a skill root.
 - **Codex is embed-not-copy:** markers `<!-- BEGIN grok-build skill -->` / `<!-- END grok-build skill -->` in `~/.codex/AGENTS.md`.
+- **AGY is dual-copy:** canonical `~/.gemini/config/skills/grok-build/` plus `~/.gemini/antigravity-cli/skills/grok-build/`; never `~/.agy/skills`.
 - **Code wins vs CLI:** `sync-check-cli.sh` compares live `grok --help` / `grok models` when present. Hidden flags live in completions even when omitted from `--help`.
 
 ## Technology choices
@@ -55,7 +58,7 @@ flowchart LR
 ## Data & boundaries
 
 - Skill files are the product. Hosts load them; this repo does not phone home.
-- Installer writes only under detected agent dirs / project `.grok/skills/` / Codex `AGENTS.md`.
+- Installer writes only under detected agent dirs / the two exact AGY `.gemini` roots / project `.grok/skills/` / Codex `AGENTS.md`.
 - Smoke tests **must** override `HOME` to a temp dir (`install-smoke.sh`).
 
 ## Cross-cutting concerns
@@ -69,7 +72,7 @@ flowchart LR
 | Feature | Doc | Notes |
 |---------|-----|-------|
 | grok-build skill | [features/grok-build-skill/README.md](./features/grok-build-skill/README.md) | Host-facing contract |
-| Installer | [features/installer/README.md](./features/installer/README.md) | Four dest |
+| Installer | [features/installer/README.md](./features/installer/README.md) | Six dest, including AGY |
 | Validation & CI | [features/validation-ci/README.md](./features/validation-ci/README.md) | Gate before publish |
 
 ## Non-goals / deferred

@@ -17,17 +17,18 @@ Copy or embed the skill into the hosts this repo supports, idempotently, without
 |-------|-----------|------------------|
 | Behavior | [`install.sh`](../../../install.sh) | Entry |
 | Consumer steps | [`README.md`](../../../README.md) · [`PUBLISH.md`](../../../PUBLISH.md) | Link |
-| Destinations decision | [ADR-0002](../../decisions/0002-four-installer-destinations.md) | Link |
+| Destinations decision | [ADR-0003](../../decisions/0003-native-agy-destinations.md) | Link |
 
 ## Users & success
 
 - **Primary users:** Humans running `./install.sh` or the curl one-liner
-- **Success metrics:** `./scripts/install-smoke.sh` green; four dest on a machine that has Claude/Grok/Codex homes
+- **Success metrics:** `./scripts/install-smoke.sh` green; six dest on a machine that has Claude/Grok/AGY/Codex homes
 - **Out of scope:** Installing the `grok` binary; `grok login`
 
 ## Acceptance criteria
 
-- [x] Four destinations only (Claude dir, Grok user dir, project-local, Codex `AGENTS.md`)
+- [x] Six destinations (Claude dir, Grok user dir, project-local, two AGY global dirs, Codex `AGENTS.md`)
+- [x] AGY uses direct children of `.gemini/config/skills` and `.gemini/antigravity-cli/skills`; never `.agy/skills`
 - [x] Does **not** write `~/.codex/skills/grok-build`
 - [x] `--uninstall` removes dests; second uninstall reports nothing to remove
 - [x] Hard-fail if any of the six references is missing
@@ -43,14 +44,14 @@ Copy or embed the skill into the hosts this repo supports, idempotently, without
 
 ## How it works
 
-Detection: `command -v claude|grok|codex` **or** `$HOME/.claude|.grok|.codex`. Project-local: CWD `.git` **or** `.grok/config.toml`. Codex: `strip_block` then append BEGIN/END around `fetch_skill_stdout`.
+Detection: `command -v claude|grok|codex` **or** `$HOME/.claude|.grok|.codex`. AGY: `command -v agy` or either corresponding `.gemini` config root. Project-local: CWD `.git` **or** `.grok/config.toml`. Codex: `strip_block` then append BEGIN/END around `fetch_skill_stdout`.
 
 ```mermaid
 flowchart TD
   Start[install.sh] --> Root{resolve_skill_root?}
   Root -->|yes| Local[cp SKILL + six refs]
   Root -->|no| Remote[curl REPO_RAW]
-  Local --> Dest[Four dest]
+  Local --> Dest[Six dest]
   Remote --> Dest
 ```
 

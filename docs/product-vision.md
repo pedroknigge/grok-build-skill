@@ -6,7 +6,7 @@
 
 ## Problem
 
-Host coding agents (Claude Code, Grok, Codex, others) need a **short, accurate** way to delegate work to the `grok` CLI in headless mode. CLI flags and defaults move faster than memory. Copy-pasted recipes that mention dead flags (`--best-of-n`, `--check`, `--self-verify`) or old model names (`grok-build`) fail before any work starts.
+Host coding agents (Claude Code, Grok, Antigravity/AGY, Codex, others) need a **short, accurate** way to delegate work to the `grok` CLI in headless mode. CLI flags and defaults move faster than memory. Copy-pasted recipes that mention dead flags (`--best-of-n`, `--check`, `--self-verify`) or old model names (`grok-build`) fail before any work starts.
 
 ## Users
 
@@ -27,6 +27,6 @@ Once installed, the host learns the **current** headless contract: discover mode
 ## Non-goals
 
 - Replacing Grok Build itself, or wrapping the TUI
-- A fifth installer destination (`~/.codex/skills/grok-build`)
+- A directory install at `~/.codex/skills/grok-build`
 - Teaching every grok subcommand (`dashboard`, `plugin`, `trace`, …) as a recipe
 - SaaS, control plane, or a Node/Python runtime in this repo
