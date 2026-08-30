@@ -117,6 +117,7 @@ for concept in \
   "streaming-messages-json" \
   "include-partial-messages" \
   "grok doctor" \
+  "grok-4.6" \
   "grok-4.5" \
   "restore-code" \
   "does not create a worktree"

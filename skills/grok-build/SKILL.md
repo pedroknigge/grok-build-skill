@@ -6,23 +6,23 @@ allowed-tools: run_terminal_command
 argument-hint: the prompt or task to send to grok
 user-invocable: true
 metadata:
-  version: "3.0"
-  last-updated: "2026-08-09"
-  focus: "CLI delegation for Grok Build CLI 1.0.0+. Headless contract (dead flags removed), worktree caveat, streaming-messages-json, resume/restore-code, model default grok-4.5, host-side quality. Assumes grok install + auth."
+  version: "3.1"
+  last-updated: "2026-08-30"
+  focus: "CLI delegation for Grok Build CLI 1.0.13+. Headless contract (dead flags removed), worktree caveat, streaming-messages-json, resume/restore-code, model default grok-4.6 (grok-4.5 still available), host-side quality. Assumes grok install + auth."
 ---
 
 # Grok Build CLI
 
 Grok Build is xAI's coding-agent CLI (binary: `grok`). It runs as a TUI and as a fully scriptable **headless** mode that host agents drive through the shell.
 
-**Target surface: Grok Build CLI 1.0.0+** (verified against live `grok 1.0.0` help, `grok models`, `grok doctor`, and local `~/.grok/docs/user-guide/`).
+**Target surface: Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13` help, `grok models`, `grok doctor`, and local `~/.grok/docs/user-guide/`).
 
 ## When to use this skill
 
 Use the `grok` CLI when you want to **delegate** work to a separate Grok agent with its own context, tools, and model:
 
 - Image/video via CLI slash commands: `/imagine`, `/imagine-video`
-- Coding / refactor / repo Q&A on a discovered model (default today: **`grok-4.5`**)
+- Coding / refactor / repo Q&A on a discovered model (default today: **`grok-4.6`**; **`grok-4.5`** still available)
 - Scripted multi-step work with machine-readable output (`json`, `streaming-json`, `streaming-messages-json`)
 - Multi-turn UUID sessions (`-r` / `-c`), optional code restore (`--restore-code`)
 - Isolated interactive worktrees (see **worktree caveat** below)
@@ -43,12 +43,12 @@ Compose both: native orchestration first; CLI when a dedicated Grok session adds
 
 ## Breaking changes since skill 2.5 / CLI 0.2.97
 
-| Topic | Skill 2.5 / old CLI | CLI 1.0.0+ (this skill) |
+| Topic | Skill 2.5 / old CLI | CLI 1.0.13+ (this skill) |
 |-------|---------------------|-------------------------|
 | Dead flags | Taught `--best-of-n`, `--check`, `--self-verify` | **Error if used.** Do not pass them. Quality → host multi-run + tests (see `references/quality-without-best-of-n.md`) |
 | Worktree + headless | Implied isolation via `-p --worktree` | **Headless (`-p`) does not create a worktree from `--worktree`.** Use interactive/`agent` worktrees or host-side `git worktree` |
-| Default model | Examples fell back to `grok-build` | Default is **`grok-4.5`**. Always `grok models` first; fallback string `grok-4.5` |
-| Resume / restore | Conversation resume | Resume by **ID or title** (scripts: **UUID**). `--restore-code` requires `--resume`; restores conversation only without it. **Remote** code restore needs `--worktree` (never checks out into CWD) |
+| Default model | Examples fell back to `grok-build` | Default is **`grok-4.6`** (extra effort **`xhigh`**). **`grok-4.5`** is still available. Always `grok models` first; fallback string `grok-4.6` |
+| Resume / restore | Conversation resume | Resume by **ID or title** (scripts: **UUID**). `--load` aliases `--resume`. `--restore-code` requires `--resume`; restores conversation only without it. **Remote** code restore needs `--worktree` (never checks out into CWD) |
 | Output formats | `plain`, `json`, `streaming-json` | Also **`streaming-messages-json`** + **`--include-partial-messages`** |
 | Spend JSON | Mixed | `stopReason` is **snake_case** (e.g. `end_turn`); token/cost rules in `references/output-formats.md` |
 
@@ -61,14 +61,14 @@ This skill assumes install + auth already done for normal use.
    - `grok login` — default browser OAuth
    - `grok login --oauth` — explicit OAuth
    - `grok login --device-auth` (alias `--device-code`) — headless/remote device code
-3. Verify: `grok --version` (≥ **1.0**), `grok doctor`, `grok inspect`, `grok models`
+3. Verify: `grok --version` (≥ **1.0.13**), `grok doctor`, `grok inspect`, `grok models`
 
 **Auth notes:** Cached session token from login is preferred. `XAI_API_KEY` is a fallback when no session is active (skill recipes do not rely on it). An invalid API key fails auth — re-login or fix the key. Headless without credentials may hang or open a browser.
 
 ## Preflight (before heavy delegation)
 
 ```bash
-command -v grok && grok --version   # require 1.0.0+
+command -v grok && grok --version   # require 1.0.13+
 grok doctor
 grok inspect
 grok models
@@ -80,7 +80,7 @@ MODEL=$(grok models 2>/dev/null | awk '
   /^Default model:/{ print $3; exit }
   /^[[:space:]]*\*/{ print $2; exit }
 ' || true)
-MODEL="${MODEL:-grok-4.5}"
+MODEL="${MODEL:-grok-4.6}"
 ```
 
 ## Headless usage (main entry)
@@ -91,7 +91,7 @@ Always use `-p` / `--single`, `--prompt-file`, or `--prompt-json`. **Never** spa
 grok -p "Your prompt here" --always-approve --no-auto-update
 ```
 
-`--always-approve` auto-approves tools (alias **`--yolo`** works). Prefer narrow `--allow` / `--deny` when possible. Live helpers: `--no-ask-user`, `--no-wait-for-background`.
+`--always-approve` auto-approves tools (alias **`--yolo`** works). Prefer narrow `--allow` / `--deny` when possible. Live helpers: `--no-ask-user`, `--no-wait-for-background`. `--memory-flush` flushes memory after the turn (or instead of a prompt when resuming). `--background-wait-timeout <SECS>` bounds wait for bg work. Flag tables: `references/flags-1.0.md`.
 
 ### Critical recipes (1.0)
 
@@ -101,7 +101,7 @@ MODEL=$(grok models 2>/dev/null | awk '
   /^Default model:/{ print $3; exit }
   /^[[:space:]]*\*/{ print $2; exit }
 ')
-MODEL="${MODEL:-grok-4.5}"
+MODEL="${MODEL:-grok-4.6}"
 grok -p "$PROMPT" --cwd "$REPO_ROOT" --model "$MODEL" \
   --output-format json --always-approve --effort high --no-auto-update \
   2>/dev/null | jq -r '.text // empty'
@@ -154,7 +154,7 @@ Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creat
 ### Sessions
 
 - `-s/--session-id` **creates** a new session; value **must be a UUID** (not nicknames like `feat-123`).
-- `-r/--resume [ID|title]` resumes (omit → most recent); `-c/--continue` → most recent for CWD.
+- `-r/--resume [ID|title]` resumes (omit → most recent); `--load` is an alias; `-c/--continue` → most recent for CWD.
 - Scripts: prefer **UUID** from `.sessionId` JSON over titles.
 - `--fork-session` with resume/continue branches history.
 - `--restore-code` only with `--resume`; remote needs `--worktree` for code.
@@ -174,8 +174,8 @@ Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creat
 - **MCP CLI:** `grok mcp list|enable|disable|doctor` (+ `add`/`remove`). Teach delegated agents `search_tool` → `use_tool`.
 - **Workflows:** enabled by default (`GROK_WORKFLOWS=0` to disable). Prefer host workflows over reinventing orchestration when already available.
 - **Sessions:** `grok sessions list|search|delete`; `grok export <SESSION_ID> [file]`.
-- **Env:** `GROK_SANDBOX`, `GROK_DISABLE_AUTOUPDATER=1`, `GROK_EXTRA_CA_BUNDLE` (custom CA). Prefer native image/video tools over CLI `/imagine` when the host has them.
-- **ACP:** `grok agent stdio` for long-lived clients; most hosts should stick to `-p`.
+- **Env:** `GROK_MEMORY=0` (prefer over `--no-memory`), `GROK_HOME`, `GROK_SANDBOX`, `GROK_DISABLE_AUTOUPDATER=1`, `GROK_EXTRA_CA_BUNDLE`.
+- **Pointers:** `grok clone`, `grok memory clear` — tables in `references/flags-1.0.md`. ACP: `grok agent stdio`; most hosts stay on `-p`.
 
 ## Failure modes (host must handle)
 
@@ -186,7 +186,7 @@ Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creat
 | Expected worktree missing under `-p` | Host `git worktree` + `--cwd`; do not rely on `-p --worktree` |
 | Permission prompts | `--always-approve` or narrow `--allow`/`--deny` |
 | Non-UUID `-s` | `uuidgen` lowercase UUID for create only |
-| Wrong model | `grok models`; fallback `grok-4.5` |
+| Wrong model | `grok models`; fallback `grok-4.6` (`grok-4.5` still available) |
 | Remote resume without code | Add `--restore-code` + `--worktree` |
 | Missing cost fields | Unreported, not free |
 | Exit 130/143 | Resume; re-verify files |
@@ -197,7 +197,7 @@ Full tables: `references/failure-modes.md`, `references/flags-1.0.md`, `referenc
 
 ```bash
 grok doctor && grok inspect && grok models
-MODEL="${MODEL:-grok-4.5}"
+MODEL="${MODEL:-grok-4.6}"
 grok -p "/imagine ..." --cwd ./out --always-approve --no-auto-update
 grok -p "<task>" -m "$MODEL" --cwd "$REPO" --output-format json \
   --always-approve --no-auto-update 2>/dev/null | jq -r '.text // empty'
@@ -210,5 +210,5 @@ grok -r "$SID" -p "..." --always-approve --cwd "$REPO"
 
 ## Sources
 
-- [Grok Build Overview](https://docs.x.ai/build/overview) · [Headless & Scripting](https://docs.x.ai/build/cli/headless-scripting) · [Changelog](https://x.ai/build/changelog)
-- Local: `~/.grok/docs/user-guide/14-headless-mode.md`, `02-authentication.md`, `17-sessions.md`, `22-permissions-and-safety.md`, `07-mcp-servers.md`
+- [Grok Build Overview](https://docs.x.ai/build/overview) · [Changelog](https://x.ai/build/changelog)
+- Local: `~/.grok/docs/user-guide/14-headless-mode.md`, `02-authentication.md`, `17-sessions.md`, `22-permissions-and-safety.md`, `07-mcp-servers.md`, `26-config-reference.md`, `27-grok-clone.md`

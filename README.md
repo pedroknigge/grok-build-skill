@@ -2,13 +2,13 @@
 
 A drop-in **skill** that teaches Claude Code, Grok Build, Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, ACP, **and when to prefer native Grok tools** instead of shelling out.
 
-**Skill 3.0** targets **Grok Build CLI 1.0.0+** (verified against live `grok 1.0.0`).
+**Skill 3.1** targets **Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13`). Default model **`grok-4.6`**; **`grok-4.5` is still available**.
 
 Once installed, the host agent learns:
 
 **CLI delegation patterns**
 - Generate images/videos via CLI when needed: `grok -p "/imagine ..." --always-approve`
-- Delegate coding / refactoring with discovered models (default today: **`grok-4.5`**)
+- Delegate coding / refactoring with discovered models (default today: **`grok-4.6`**; **`grok-4.5` still available**)
 - Streaming NDJSON (`streaming-json`, **`streaming-messages-json`** + **`--include-partial-messages`**), **UUID sessions** + resume/title, JSON usage/cost
 - Resume + optional **`--restore-code`** (remote needs **`--worktree`**)
 - Correct **worktree** semantics: headless (`-p`) does **not** create a worktree from `--worktree`
@@ -37,7 +37,7 @@ cd grok-build-skill
 
 The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `references/`) into detected agents. It hard-fails if any shipped reference is missing. Local tree is used only when `install.sh` is a real on-disk script that contains `skills/grok-build/SKILL.md`, or when `GROK_BUILD_SKILL_ROOT` is set — `curl | bash` always uses `REPO_RAW` (not CWD).
 
-**Release note:** the public one-liner and `REPO_RAW` fetches only deliver v3.0 after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace.
+**Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.1)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.0.0` one-liners will not move until a new tag/release.
 
 **Re-running is safe** — idempotent overwrite for Claude/Grok; Codex `AGENTS.md` block is replaced in place (no duplication).
 
@@ -90,7 +90,7 @@ Details live in [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) (�
 
 ## Prerequisites
 
-- **Grok Build CLI 1.0.0+** on PATH (`grok --version`)
+- **Grok Build CLI 1.0.13+** on PATH (`grok --version`)
 - Auth: `grok login` (or `grok login --device-auth` / `--oauth`)
 
 ```bash
@@ -118,12 +118,12 @@ MIT — see [`LICENSE`](./LICENSE).
 
 ## Contributing
 
-Keep the skill **short, accurate, and high-signal** for CLI **1.0.0+**.
+Keep the skill **short, accurate, and high-signal** for CLI **1.0.13+**.
 
 When updating:
-- Edit `skills/grok-build/SKILL.md` (entrypoint) and/or `references/*`
+- Edit `skills/grok-build/SKILL.md` (entrypoint) and/or `references/*` (six files; no 7th unless flags overflows)
 - Do **not** teach `--best-of-n`, `--check`, `--self-verify` as live flags
-- Model fallback: **`grok-4.5`**, never primary `echo grok-build`
+- Model fallback: **`grok-4.6`** (keep a **`grok-4.5`** mention — still available). Never primary `echo grok-build`. grok-4.6 extra effort: **`xhigh`**
 - Bump frontmatter `version` / `last-updated` and `CHANGELOG.md`
 - Run:
   ```bash
@@ -143,7 +143,9 @@ CI (`.github/workflows/ci.yml`) runs validate + install-smoke on push/PR.
 
 ## Sources
 
+Prefer local `~/.grok/docs/user-guide/` and live `grok --help` / completions over the public headless-scripting page (it can lag).
+
+- Local: `~/.grok/docs/user-guide/14-headless-mode.md`, `02-authentication.md`, `17-sessions.md`, `26-config-reference.md`, `27-grok-clone.md`
 - [Grok Build Overview](https://docs.x.ai/build/overview)
 - [Headless & Scripting](https://docs.x.ai/build/cli/headless-scripting)
 - [Grok Build Changelog](https://x.ai/build/changelog)
-- Local: `~/.grok/docs/user-guide/14-headless-mode.md`, `02-authentication.md`, `17-sessions.md`

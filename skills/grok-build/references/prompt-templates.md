@@ -69,7 +69,7 @@ Prefer native host image tools when available.
 ## Noise-resistant heavy audit invocation
 
 ```bash
-MODEL="${MODEL:-grok-4.5}"
+MODEL="${MODEL:-grok-4.6}"
 grok -p "$AUDITOR_PROMPT" \
   --cwd "$REPO_ROOT" --model "$MODEL" \
   --output-format json \

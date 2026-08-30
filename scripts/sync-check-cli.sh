@@ -73,15 +73,20 @@ for flag in --best-of-n --self-verify; do
 done
 
 # Required skill strings
-for s in streaming-messages-json include-partial-messages grok-4.5 restore-code "grok doctor"; do
+for s in streaming-messages-json include-partial-messages grok-4.6 grok-4.5 restore-code "grok doctor"; do
   if ! grep -R -F -q -- "$s" "$SKILL" "$REF_DIR" 2>/dev/null; then
     echo "FAIL: skill corpus missing required string: $s"
     exit 1
   fi
 done
 
-# Quick models check if logged in (non-fatal)
+# Quick models check if logged in (non-fatal; grok-4.5 absence is WARN only)
 if MODELS_OUT="$(grok models 2>&1)"; then
+  if echo "$MODELS_OUT" | grep -Fq 'grok-4.6'; then
+    echo "  models: grok-4.6 present"
+  else
+    echo "WARN: grok-4.6 not listed by grok models (environment-specific)"
+  fi
   if echo "$MODELS_OUT" | grep -Fq 'grok-4.5'; then
     echo "  models: grok-4.5 present"
   else

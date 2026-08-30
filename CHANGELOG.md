@@ -1,5 +1,27 @@
 # Changelog
 
+## v3.1 — 2026-08-30
+
+### Skill 3.1 / Grok Build CLI 1.0.13+
+
+Accuracy bump against live `grok 1.0.13` (`grok --version`, `grok models`, `grok doctor`, completions, local `~/.grok/docs/user-guide/`). Skill stays **3.x**. Slim `SKILL.md` entrypoint + the same **six** references (`flags-1.0.md`, `output-formats.md`, `sessions-and-resume.md`, `failure-modes.md`, `quality-without-best-of-n.md`, `prompt-templates.md`).
+
+**Models**
+- Discovery still first via `grok models`. Fallback string is **`grok-4.6`** (live default). **`grok-4.5` remains available.**
+- grok-4.6 extra effort: **`xhigh`**. Canonical effort list: `none | minimal | low | medium | high | xhigh | max` (a model only accepts advertised levels).
+
+**Headless surface (tables in `references/flags-1.0.md`; SKILL stays slim)**
+- `--memory-flush`, `--background-wait-timeout`, `--load` (alias of `--resume`), `--compaction-mode` (`summary|transcript|segments`, default `segments`) / `--compaction-detail` (`none|minimal|balanced|verbose`, default `verbose`; segments only).
+- Prefer **`GROK_MEMORY=0`** to disable memory (`--no-memory` is legacy compat).
+- Subcommand pointers: `grok clone`, `grok memory` (not SKILL recipes).
+- Dead `-p` flags still dead: `--best-of-n`, `--self-verify`; `--check` is only `grok update --check`.
+
+**Packaging**
+- Installer banner/footer **v3.1 / CLI 1.0.13+ / default grok-4.6**. Still four destinations (Claude, Grok user, project-local, Codex `AGENTS.md`). MIT, idempotent. No fifth dest.
+- `validate-skill.sh` / `install-smoke.sh` / `sync-check-cli.sh` require **`grok-4.6`** and still require a **`grok-4.5`** mention.
+- `PUBLISH.md` retargeted to bump → checksum → push → optional tag (origin `pedroknigge/grok-build-skill` already exists). Tag-pinned `v3.0.0` one-liner does not move until a new tag/release.
+- `.orderfield` gitignored.
+
 ## v3.0 — 2026-08-09
 
 ### Skill 3.0 / Grok Build CLI 1.0.0+

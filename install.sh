@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# grok-build skill installer — v3.0 (idempotent)
+# grok-build skill installer — v3.1 (idempotent)
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/pedroknigge/grok-build-skill/main/install.sh | bash
 # Or, from a local clone (recommended for development):
@@ -187,7 +187,7 @@ removed_any=0
 if [[ "$UNINSTALL" -eq 1 ]]; then
   cyan "→ grok-build skill uninstaller"
 else
-  cyan "→ grok-build skill installer (v3.0 / Grok Build CLI 1.0 — idempotent)"
+  cyan "→ grok-build skill installer (v3.1 / Grok Build CLI 1.0.13+ — idempotent)"
   if [[ -n "$SKILL_ROOT" ]]; then
     cyan "  source: local tree $SKILL_ROOT"
   else
@@ -289,7 +289,7 @@ if [[ "$installed_any" -eq 0 ]]; then
 fi
 
 cyan "→ Done. Invoke with /grok-build (Claude Code, Grok) or auto-loaded in Codex."
-cyan "  Skill 3.0 targets Grok Build CLI 1.0.0+ (dead flags removed; default model grok-4.5)."
+cyan "  Skill 3.1 targets Grok Build CLI 1.0.13+ (dead flags removed; default model grok-4.6)."
 cyan "  Tip: re-run this script (or ./install.sh from a clone) anytime to update."
 cyan "  For project-local skills: the installer also writes to .grok/skills/ when run inside a git repo."
 cyan "  To remove: ./install.sh --uninstall"

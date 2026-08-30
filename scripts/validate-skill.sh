@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # validate-skill.sh
-# Contract-aware validator for the grok-build skill (v3.0 / CLI 1.0).
+# Contract-aware validator for the grok-build skill (v3.1 / CLI 1.0.13+).
 #
 # Usage: ./scripts/validate-skill.sh [path-to-SKILL.md]
 set -euo pipefail
@@ -46,7 +46,7 @@ done
 
 # 3. Version 3.x required
 if ! grep -q 'version: "3\.' "$SKILL_FILE"; then
-  echo "FAIL: expected metadata version 3.x (skill 3.0 series / CLI 1.0)"
+  echo "FAIL: expected metadata version 3.x (skill 3.x series / CLI 1.0)"
   exit 1
 fi
 
@@ -70,6 +70,7 @@ REQUIRED_CONCEPTS=(
   "streaming-messages-json"
   "include-partial-messages"
   "grok doctor"
+  "grok-4.6"
   "grok-4.5"
   "restore-code"
   "stopReason"
@@ -90,7 +91,7 @@ for concept in "${REQUIRED_CONCEPTS[@]}"; do
 done
 
 # Entrypoint must carry the critical contract (not only references/)
-for concept in "streaming-messages-json" "include-partial-messages" "grok doctor" "grok-4.5" "restore-code"; do
+for concept in "streaming-messages-json" "include-partial-messages" "grok doctor" "grok-4.6" "grok-4.5" "restore-code"; do
   if ! grep -F -q -- "$concept" "$SKILL_FILE"; then
     echo "FAIL: SKILL.md entrypoint must mention: $concept"
     exit 1
@@ -102,9 +103,9 @@ if ! grep -E -q 'does not create a worktree' "$SKILL_FILE"; then
   exit 1
 fi
 
-# Target surface mention
+# Target surface mention (1.0 family; "1.0.13+" matches CLI 1.0 / Grok Build CLI 1)
 if ! grep -Eiq '1\.0\.0|CLI 1\.0|Grok Build CLI 1' "$SKILL_FILE"; then
-  echo "FAIL: SKILL.md must target Grok Build CLI 1.0 / 1.0.0+"
+  echo "FAIL: SKILL.md must target Grok Build CLI 1.0 family (1.0.13+)"
   exit 1
 fi
 
@@ -150,7 +151,7 @@ fi
 
 # 8. FAIL primary fallback echo grok-build
 if grep -nE 'echo[[:space:]]+grok-build\b|\|\|[[:space:]]*echo[[:space:]]+grok-build\b' "$SKILL_FILE"; then
-  echo "FAIL: Primary model fallback must not be 'echo grok-build' (use grok-4.5)"
+  echo "FAIL: Primary model fallback must not be 'echo grok-build' (use grok-4.6)"
   exit 1
 fi
 if [[ -d "$REF_DIR" ]] && grep -R -nE 'echo[[:space:]]+grok-build\b' "$REF_DIR"; then

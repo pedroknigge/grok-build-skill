@@ -1,4 +1,4 @@
-# Output formats (CLI 1.0)
+# Output formats (CLI 1.0.13)
 
 Four headless formats plus optional partials:
 
@@ -27,7 +27,7 @@ Typical final object fields:
 | `requestId` | Request correlation id |
 | `num_turns` | Main-agent model rounds |
 | `usage` | Token totals for the prompt (includes finished subagents when applied) |
-| `modelUsage` | Per-model breakdown + optional `costUSD` |
+| `modelUsage` | Per-model breakdown + optional `costUSD` (key is the model id, e.g. **`grok-4.6`**) |
 | `total_cost_usd` | Complete USD cost when fully stamped |
 | `total_cost_usd_ticks` | Integer ticks (1 USD = 10^10 ticks) |
 
@@ -57,7 +57,7 @@ SID=$(... | jq -r '.sessionId')
 
 ## `streaming-json`
 
-NDJSON events (`text`, `thought`, `end`, `error`, plus others like `max_turns_reached`). Spend fields land on the final `end` event. `stopReason` on stream events is snake_case.
+NDJSON events (`text`, `thought`, `end`, `error`, plus others like `max_turns_reached`). Includes tool calls, results, and usage. Spend fields land on the final `end` event. `stopReason` on stream events is snake_case.
 
 ```bash
 ... --output-format streaming-json 2>/dev/null | \

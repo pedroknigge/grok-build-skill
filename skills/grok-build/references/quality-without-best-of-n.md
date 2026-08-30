@@ -1,6 +1,6 @@
 # Quality without `--best-of-n` / `--check`
 
-CLI 1.0 **removed** `--best-of-n`, `--check`, and `--self-verify`. Passing them errors.
+CLI 1.0 **removed** `--best-of-n`, `--check`, and `--self-verify`. Passing them errors. `--check` is only `grok update --check`.
 
 Use host-side and native patterns instead.
 
@@ -9,7 +9,7 @@ Use host-side and native patterns instead.
 Run the same prompt N times (or with varied seeds/rules), keep artifacts, pick the best:
 
 ```bash
-MODEL="${MODEL:-grok-4.5}"
+MODEL="${MODEL:-grok-4.6}"
 PROMPT="Fix the failing unit tests for module X and summarize changes."
 for i in 1 2 3; do
   grok -p "$PROMPT" \

@@ -1,15 +1,17 @@
-# Sessions and resume (CLI 1.0)
+# Sessions and resume (CLI 1.0.13)
 
 ## Create vs resume
 
 | Action | Flag | Rules |
 |--------|------|-------|
 | Create | `-s` / `--session-id <UUID>` | Must be a **valid UUID** that does not already exist. **Does not resume.** Nicknames (`feat-123`) fail. |
-| Resume | `-r` / `--resume [ID\|title]` | Resume by session ID or title; omit for most recent. |
+| Resume | `-r` / `--resume [ID\|title]` | Resume by session ID or title; omit for most recent. **`--load <ID>` is an alias of `--resume`.** |
 | Continue | `-c` / `--continue` | Most recent session for the **current directory**. |
 | Fork | `--fork-session` | With resume/continue: new session ID (optionally named via `-s` UUID). |
 
 Default headless: each `grok -p` creates a **fresh** session unless you resume/continue.
+
+Since **1.0.11**, headless sessions are **browsable in the resume picker** without mixing into default history.
 
 ## Title vs UUID
 
@@ -24,6 +26,7 @@ grok -p "Plan feature X." --session-id "$SID" --cwd "$REPO" \
   --always-approve --no-auto-update --output-format json
 
 grok -p "Implement." --resume "$SID" --cwd "$REPO" --always-approve --no-auto-update
+# equivalent: grok -p "Implement." --load "$SID" --cwd "$REPO" --always-approve --no-auto-update
 
 # Capture from JSON
 SID=$(grok -p "..." --output-format json --always-approve --no-auto-update 2>/dev/null | jq -r '.sessionId')
