@@ -2,7 +2,7 @@
 
 A drop-in **skill** that teaches Claude Code, Grok Build, Antigravity (`agy`), Codex, or any agent that reads `SKILL.md` files how to drive the [xAI Grok Build CLI](https://docs.x.ai/build/overview) from the terminal in **headless mode** — including `/imagine`, `/imagine-video`, multi-turn sessions, ACP, **and when to prefer native Grok tools** instead of shelling out.
 
-**Skill 3.2** targets **Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13`). Default model **`grok-4.6`**; **`grok-4.5` is still available**.
+**Skill 3.3** targets **Grok Build CLI 1.0.48** (verified against live `grok 1.0.48 (b94d5072c95f) [alpha]`). Default model **`grok-4.7`**. Still available: **`grok-4.7-build-fast`**, **`grok-4.6`**, **`grok-4.5`**.
 
 Agent hub for this repo: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
 
@@ -10,10 +10,10 @@ Once installed, the host agent learns:
 
 **CLI delegation patterns**
 - Generate images/videos via CLI when needed: `grok -p "/imagine ..." --always-approve`
-- Delegate coding / refactoring with discovered models (default today: **`grok-4.6`**; **`grok-4.5` still available**)
+- Delegate coding / refactoring with discovered models (default today: **`grok-4.7`**; **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** still available)
 - Streaming NDJSON (`streaming-json`, **`streaming-messages-json`** + **`--include-partial-messages`**), **UUID sessions** + resume/title, JSON usage/cost
 - Resume + optional **`--restore-code`** (remote needs **`--worktree`**)
-- Correct **worktree** semantics: headless (`-p`) does **not** create a worktree from `--worktree`
+- **`--worktree` creates a git worktree** (dirty changes included). **`--ref`** is a clean checkout. Not combinable with **`--fork-session`**
 
 **Quality without dead flags**
 - CLI 1.0 **errors** on `--best-of-n`, `--check`, `--self-verify` — skill teaches host multi-run + tests instead
@@ -41,7 +41,7 @@ The installer copies the full `skills/grok-build/` directory (`SKILL.md` + `refe
 
 Project-local install writes `.grok/skills/grok-build/` when the current directory has `.git` **or** `.grok/config.toml` (either trigger is enough).
 
-**Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.2)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.1.0` one-liners will not move until a new tag/release.
+**Release note:** the public one-liner and `REPO_RAW` fetches only deliver **this version (skill 3.3)** after this tree is **committed and pushed** to the branch those URLs point at. Until then, use clone + `./install.sh` from this workspace. Tag-pinned `v3.2.0` one-liners will not move until a new tag/release.
 
 **Re-running is safe** — idempotent overwrite for Claude/Grok/AGY; Codex `AGENTS.md` block is replaced in place (no duplication).
 
@@ -94,7 +94,7 @@ Codex: the installer embeds `SKILL.md` into `~/.codex/AGENTS.md` between markers
 | Repo Q&A / coding | `grok -p "..." --cwd "$REPO" --output-format json` | Direct tools + subagents |
 | Structured output | `--json-schema` | Native tool results |
 | Usage / cost | `jq '{sessionId, stopReason, total_cost_usd, usage}'` | Host metering |
-| Isolation | Host `git worktree` + `--cwd` (not magic `-p --worktree`) | Subagent isolation |
+| Isolation | `--worktree` creates a git worktree (not with `--fork-session`) | Subagent isolation |
 | Quality | Host multi-run + tests (no `--best-of-n` / `--check`) | Parallel native subagents |
 | Multi-turn | UUID `-s` create; `-r` UUID preferred | Native conversation |
 | Resume code | `--resume ID --restore-code` (+ `--worktree` if remote) | N/A |
@@ -104,7 +104,7 @@ Details live in [`skills/grok-build/SKILL.md`](./skills/grok-build/SKILL.md) (�
 
 ## Prerequisites
 
-- **Grok Build CLI 1.0.13+** on PATH (`grok --version`)
+- **Grok Build CLI 1.0.48** on PATH (`grok --version`)
 - Auth: `grok login` (or `grok login --device-auth` / `--oauth`)
 
 ```bash
@@ -134,12 +134,12 @@ MIT — see [`LICENSE`](./LICENSE).
 
 ## Contributing
 
-Keep the skill **short, accurate, and high-signal** for CLI **1.0.13+**. Agent hub: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
+Keep the skill **short, accurate, and high-signal** for CLI **1.0.48**. Agent hub: [`AGENTS.md`](./AGENTS.md). On conflict, **code wins**.
 
 When updating:
 - Edit `skills/grok-build/SKILL.md` (entrypoint) and/or `references/*` (six files; no 7th unless flags overflows)
 - Do **not** teach `--best-of-n`, `--check`, `--self-verify` as live flags
-- Model fallback: **`grok-4.6`** (keep a **`grok-4.5`** mention — still available). Never primary `echo grok-build`. grok-4.6 extra effort: **`xhigh`**
+- Model fallback: **`grok-4.7`**. Keep **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** as still available. Never primary `echo grok-build`. A model accepts only advertised effort levels.
 - Bump frontmatter `version` / `last-updated` and `CHANGELOG.md`
 - If architecture or install destinations change, update `AGENTS.md` and `docs/`
 - Run:

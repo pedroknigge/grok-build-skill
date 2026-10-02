@@ -5,11 +5,11 @@
 
 **Status:** Real  
 **Slug:** `grok-build-skill`  
-**Last updated:** 2026-08-30
+**Last updated:** 2026-10-01
 
 ## Purpose
 
-Teach host agents the **Grok Build CLI 1.0.13+** headless contract so they can delegate via `grok -p` without using dead flags or stale model names.
+Teach host agents the **Grok Build CLI 1.0.48** headless contract so they can delegate via `grok -p` without using dead flags or stale model names.
 
 ## Canonical authority
 
@@ -33,10 +33,10 @@ Do not re-narrate those files here.
 
 ## Acceptance criteria
 
-- [x] Frontmatter `version: "3.2"` and `last-updated: "2026-08-30"`
-- [x] Entrypoint ≤220 lines (currently 214)
-- [x] Default model string `grok-4.6`; `grok-4.5` mentioned
-- [x] Headless worktree caveat: `-p` does not create a worktree from `--worktree`
+- [x] Frontmatter `version: "3.3"` and `last-updated: "2026-10-01"`
+- [x] Entrypoint ≤220 lines (currently 217)
+- [x] Default model string `grok-4.7`; `grok-4.7-build-fast`, `grok-4.6`, and `grok-4.5` mentioned
+- [x] `--worktree` creates a git worktree, including under `-p`
 - [x] Four output formats including `streaming-messages-json`
 
 ## Public surface
@@ -56,7 +56,7 @@ flowchart LR
   Host[Host agent] --> Skill[SKILL.md]
   Skill --> Native[Native tools if enough]
   Skill --> CLI["grok -p ..."]
-  CLI --> Model["grok-4.6 / grok-4.5"]
+  CLI --> Model["grok-4.7 default"]
 ```
 
 ## Design decisions

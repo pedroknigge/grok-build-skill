@@ -3,8 +3,8 @@
 > Hub for this repository. Read this file and the linked docs before significant work. Update them when install destinations, the skill contract, or CLI targeting change.  
 > **Code is the source of truth** for how the installer, validators, and skill files behave. These documents capture *what* and *why*. On conflict, **code wins** — fix or flag the doc.
 
-**Status:** Shipped (skill **3.2** / Grok Build CLI **1.0.13+**, default model **`grok-4.6`**)
-**Last updated:** 2026-08-30
+**Status:** Shipped (skill **3.3** / Grok Build CLI **1.0.48**, default model **`grok-4.7`**)
+**Last updated:** 2026-10-01
 
 ## Project Overview
 
@@ -56,7 +56,7 @@ Canonical **product** surface (what hosts load): [`skills/grok-build/SKILL.md`](
 - **Do not invent CLI flags, models, or installer destinations.** Evidence: live `grok --help` / completions, `install.sh`, and the six reference files.
 - Keep `SKILL.md` slim (≤220 lines). Flag tables live in `references/flags-1.0.md`.
 - Do **not** teach `--best-of-n`, `--check`, or `--self-verify` as live `-p` flags (`--check` is only `grok update --check`).
-- Model fallback string is **`grok-4.6`**. Keep a **`grok-4.5`** mention. Never `echo grok-build`.
+- Model fallback string is **`grok-4.7`**. Keep **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** as still available. Never `echo grok-build`. Do not invent an effort tier for `grok-4.7`.
 - After changing hashed files (`install.sh`, `SKILL.md`, `references/*`), regenerate `SHA256SUMS`.
 - After work that changes architecture, destinations, or the skill contract, update this hub, coverage rows, and the claims matrix.
 - Prefer ADRs for locked trade-offs. Do not delete durable decisions; mark Superseded.
@@ -64,6 +64,6 @@ Canonical **product** surface (what hosts load): [`skills/grok-build/SKILL.md`](
 
 ## Current Status Summary
 
-Skill **3.2** is aligned with live **Grok Build CLI 1.0.13** and adds native AGY discovery through both global Gemini skill roots. Headless quality flags from skill 2.5 remain dead. Installer has **six** destinations.
+Skill **3.3** is aligned with live **Grok Build CLI 1.0.48** (`b94d5072c95f`, alpha). Default model is **`grok-4.7`**. `--worktree` creates a git worktree. Headless quality flags from skill 2.5 remain dead. Installer has **six** destinations.
 
-_Last updated: 2026-08-30 for native AGY packaging_
+_Last updated: 2026-10-01 for the CLI 1.0.48 contract_

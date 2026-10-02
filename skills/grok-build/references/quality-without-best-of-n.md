@@ -9,7 +9,7 @@ Use host-side and native patterns instead.
 Run the same prompt N times (or with varied seeds/rules), keep artifacts, pick the best:
 
 ```bash
-MODEL="${MODEL:-grok-4.6}"
+MODEL="${MODEL:-grok-4.7}"
 PROMPT="Fix the failing unit tests for module X and summarize changes."
 for i in 1 2 3; do
   grok -p "$PROMPT" \
@@ -78,4 +78,5 @@ Host rejects `ok: false` or missing fields.
 
 - Teaching or copying `--best-of-n` / `--check` / `--self-verify`
 - Trusting final text without host tests
-- Assuming `-p --worktree` isolates edits (it does not create a worktree)
+- Combining `--worktree` with `--fork-session` (they are not combinable)
+- Expecting `--ref` / `--worktree-ref` to carry dirty files (that checkout is clean)

@@ -1,4 +1,4 @@
-# Output formats (CLI 1.0.13)
+# Output formats (CLI 1.0.48)
 
 Four headless formats plus optional partials:
 
@@ -27,7 +27,7 @@ Typical final object fields:
 | `requestId` | Request correlation id |
 | `num_turns` | Main-agent model rounds |
 | `usage` | Token totals for the prompt (includes finished subagents when applied) |
-| `modelUsage` | Per-model breakdown + optional `costUSD` (key is the model id, e.g. **`grok-4.6`**) |
+| `modelUsage` | Per-model breakdown + optional `costUSD` (key is the model id, e.g. **`grok-4.7`**) |
 | `total_cost_usd` | Complete USD cost when fully stamped |
 | `total_cost_usd_ticks` | Integer ticks (1 USD = 10^10 ticks) |
 

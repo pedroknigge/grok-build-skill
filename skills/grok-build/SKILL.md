@@ -6,26 +6,26 @@ allowed-tools: run_terminal_command
 argument-hint: the prompt or task to send to grok
 user-invocable: true
 metadata:
-  version: "3.2"
-  last-updated: "2026-08-30"
-  focus: "CLI delegation for Grok Build CLI 1.0.13+. Headless contract (dead flags removed), worktree caveat, streaming-messages-json, resume/restore-code, model default grok-4.6 (grok-4.5 still available), host-side quality. Assumes grok install + auth."
+  version: "3.3"
+  last-updated: "2026-10-01"
+  focus: "CLI delegation for Grok Build CLI 1.0.48 (b94d5072c95f) [alpha]. Worktree creates a git worktree, streaming-messages-json, resume/restore-code, model default grok-4.7 (grok-4.7-build-fast, grok-4.6, and grok-4.5 still available), host-side quality. Assumes grok install + auth."
 ---
 
 # Grok Build CLI
 
 Grok Build is xAI's coding-agent CLI (binary: `grok`). It runs as a TUI and as a fully scriptable **headless** mode that host agents drive through the shell.
 
-**Target surface: Grok Build CLI 1.0.13+** (verified against live `grok 1.0.13` help, `grok models`, `grok doctor`, and local `~/.grok/docs/user-guide/`).
+**Target surface: Grok Build CLI 1.0.48** (verified against live `grok 1.0.48 (b94d5072c95f) [alpha]` help, `grok models`, `grok doctor`, completions, and local `~/.grok/docs/user-guide/`).
 
 ## When to use this skill
 
 Use the `grok` CLI when you want to **delegate** work to a separate Grok agent with its own context, tools, and model:
 
 - Image/video via CLI slash commands: `/imagine`, `/imagine-video`
-- Coding / refactor / repo Q&A on a discovered model (default today: **`grok-4.6`**; **`grok-4.5`** still available)
+- Coding / refactor / repo Q&A on a discovered model (default today: **`grok-4.7`**; still available: **`grok-4.7-build-fast`**, **`grok-4.6`**, **`grok-4.5`**)
 - Scripted multi-step work with machine-readable output (`json`, `streaming-json`, `streaming-messages-json`)
 - Multi-turn UUID sessions (`-r` / `-c`), optional code restore (`--restore-code`)
-- Isolated interactive worktrees (see **worktree caveat** below)
+- A session git worktree (`--worktree` creates one; see below)
 
 **Do not** use the CLI when native host tools already cover the request (simple edits, local terminal, host web search, host image tools).
 
@@ -43,12 +43,12 @@ Compose both: native orchestration first; CLI when a dedicated Grok session adds
 
 ## Breaking changes since skill 2.5 / CLI 0.2.97
 
-| Topic | Skill 2.5 / old CLI | CLI 1.0.13+ (this skill) |
+| Topic | Skill 2.5 / old CLI | CLI 1.0.48 (this skill) |
 |-------|---------------------|-------------------------|
 | Dead flags | Taught `--best-of-n`, `--check`, `--self-verify` | **Error if used.** Do not pass them. Quality → host multi-run + tests (see `references/quality-without-best-of-n.md`) |
-| Worktree + headless | Implied isolation via `-p --worktree` | **Headless (`-p`) does not create a worktree from `--worktree`.** Use interactive/`agent` worktrees or host-side `git worktree` |
-| Default model | Examples fell back to `grok-build` | Default is **`grok-4.6`** (extra effort **`xhigh`**). **`grok-4.5`** is still available. Always `grok models` first; fallback string `grok-4.6` |
-| Resume / restore | Conversation resume | Resume by **ID or title** (scripts: **UUID**). `--load` aliases `--resume`. `--restore-code` requires `--resume`; restores conversation only without it. **Remote** code restore needs `--worktree` (never checks out into CWD) |
+| Worktree | Implied isolation via `-p --worktree` | **`--worktree` creates a git worktree** (dirty changes included; a subdirectory launch lands in that same relative directory). **`--ref` / `--worktree-ref`** is a clean checkout, no dirty overlay. **`-r` resumes the session into the new worktree.** Not combinable with **`--fork-session`** |
+| Default model | Examples fell back to `grok-build` | Default is **`grok-4.7`**. Still available: **`grok-4.7-build-fast`**, **`grok-4.6`**, **`grok-4.5`**. Always `grok models` first; fallback string `grok-4.7`. A model accepts only advertised effort levels |
+| Resume / restore | Conversation resume | `--resume` takes an ID or a current-directory title (case-insensitive). UUID-shaped values are always IDs. A sole renamed title wins; other duplicate titles fail as ambiguous. `--load` aliases `--resume`. `--restore-code` requires `--resume`. **Remote** code restore needs `--worktree` |
 | Output formats | `plain`, `json`, `streaming-json` | Also **`streaming-messages-json`** + **`--include-partial-messages`** |
 | Spend JSON | Mixed | `stopReason` is **snake_case** (e.g. `end_turn`); token/cost rules in `references/output-formats.md` |
 
@@ -61,14 +61,14 @@ This skill assumes install + auth already done for normal use.
    - `grok login` — default browser OAuth
    - `grok login --oauth` — explicit OAuth
    - `grok login --device-auth` (alias `--device-code`) — headless/remote device code
-3. Verify: `grok --version` (≥ **1.0.13**), `grok doctor`, `grok inspect`, `grok models`
+3. Verify: `grok --version` (**1.0.48**), `grok doctor`, `grok inspect`, `grok models`
 
 **Auth notes:** Cached session token from login is preferred. `XAI_API_KEY` is a fallback when no session is active (skill recipes do not rely on it). An invalid API key fails auth — re-login or fix the key. Headless without credentials may hang or open a browser.
 
 ## Preflight (before heavy delegation)
 
 ```bash
-command -v grok && grok --version   # require 1.0.13+
+command -v grok && grok --version   # require 1.0.48
 grok doctor
 grok inspect
 grok models
@@ -80,7 +80,7 @@ MODEL=$(grok models 2>/dev/null | awk '
   /^Default model:/{ print $3; exit }
   /^[[:space:]]*\*/{ print $2; exit }
 ' || true)
-MODEL="${MODEL:-grok-4.6}"
+MODEL="${MODEL:-grok-4.7}"
 ```
 
 ## Headless usage (main entry)
@@ -91,9 +91,9 @@ Always use `-p` / `--single`, `--prompt-file`, or `--prompt-json`. **Never** spa
 grok -p "Your prompt here" --always-approve --no-auto-update
 ```
 
-`--always-approve` auto-approves tools (alias **`--yolo`** works). Prefer narrow `--allow` / `--deny` when possible. Live helpers: `--no-ask-user`, `--no-wait-for-background`. `--memory-flush` flushes memory after the turn (or instead of a prompt when resuming). `--background-wait-timeout <SECS>` bounds wait for bg work. Flag tables: `references/flags-1.0.md`.
+`--always-approve` auto-approves tools (hidden alias **`--yolo`**). Prefer narrow `--allow` / `--deny` when possible. Hidden-but-live helpers (completions, omitted from default `--help`): `--no-ask-user`, `--no-wait-for-background`, `--memory-flush`, `--background-wait-timeout`, `--no-auto-update`. Flag tables: `references/flags-1.0.md`.
 
-### Critical recipes (1.0)
+### Critical recipes (1.0.48)
 
 ```bash
 # Robust one-shot
@@ -101,7 +101,7 @@ MODEL=$(grok models 2>/dev/null | awk '
   /^Default model:/{ print $3; exit }
   /^[[:space:]]*\*/{ print $2; exit }
 ')
-MODEL="${MODEL:-grok-4.6}"
+MODEL="${MODEL:-grok-4.7}"
 grok -p "$PROMPT" --cwd "$REPO_ROOT" --model "$MODEL" \
   --output-format json --always-approve --effort high --no-auto-update \
   2>/dev/null | jq -r '.text // empty'
@@ -133,11 +133,13 @@ done
 # Then host: pick best + run project tests/typecheck/lint
 ```
 
-### Worktree caveat (must remember)
+### Worktree
 
-- Interactive / non-`-p` sessions: `-w/--worktree [NAME]` can create an isolated git worktree (`--worktree-ref` / `--ref` optional).
-- **`grok -p ... --worktree ...` does not create a worktree** on CLI 1.0. For headless isolation, create a worktree with `git worktree add` (or interactive grok) and pass `--cwd` into that path.
-- Cleanup: `grok worktree list|rm|gc` when worktrees were created by grok.
+- `-w` / `--worktree [NAME]` **creates a git worktree** from the current checkout and runs the session there, including under `-p`. Dirty changes are included. A subdirectory launch lands in that same relative directory of the worktree.
+- `--ref` / `--worktree-ref` bases the worktree on a branch, tag, or commit: a clean checkout, no dirty overlay.
+- `-r` resumes the session into the new worktree. `--worktree` is not combinable with `--fork-session`.
+- Remote `--restore-code` still requires `--worktree` (never checks out into the current directory).
+- Manage with `grok worktree create|list|rm|gc`.
 
 ### Output formats (4) + partials
 
@@ -149,14 +151,14 @@ done
 | `streaming-messages-json` | NDJSON Messages API wire format |
 | + `--include-partial-messages` | Only with `streaming-messages-json`: `stream_event` deltas |
 
-Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creation_input_tokens` + `output_tokens` (creation may be 0). Missing `total_cost_usd` means **unreported**, not free (`cost_is_partial` / `usage_is_incomplete`). Details: `references/output-formats.md`.
+Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creation_input_tokens` + `output_tokens` (creation may be 0). Missing `total_cost_usd` means **unreported**, not free (`cost_is_partial` / `usage_is_incomplete`). Per-session totals: `grok usage <SESSION_ID>`. Details: `references/output-formats.md`.
 
 ### Sessions
 
-- `-s/--session-id` **creates** a new session; value **must be a UUID** (not nicknames like `feat-123`).
-- `-r/--resume [ID|title]` resumes (omit → most recent); `--load` is an alias; `-c/--continue` → most recent for CWD.
+- `-s` / `--session-id` **creates** a new session only; value **must be a UUID** that does not already exist (not nicknames like `feat-123`).
+- `-r` / `--resume [ID|title]` resumes (omit → most recent). Non-ID values match session titles for the current directory, ignoring letter case. UUID-shaped values always mean IDs. Among duplicate titles a sole renamed match wins; otherwise the resume fails as ambiguous. `--load` is an alias. `-c` / `--continue` → most recent for CWD.
 - Scripts: prefer **UUID** from `.sessionId` JSON over titles.
-- `--fork-session` with resume/continue branches history.
+- `--fork-session` with resume/continue branches history. It cannot be combined with `--worktree`.
 - `--restore-code` only with `--resume`; remote needs `--worktree` for code.
 
 ### Lifecycle
@@ -173,9 +175,10 @@ Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creat
 
 - **MCP CLI:** `grok mcp list|enable|disable|doctor` (+ `add`/`remove`). Teach delegated agents `search_tool` → `use_tool`.
 - **Workflows:** enabled by default (`GROK_WORKFLOWS=0` to disable). Prefer host workflows over reinventing orchestration when already available.
-- **Sessions:** `grok sessions list|search|delete`; `grok export <SESSION_ID> [file]`.
+- **Sessions:** `grok sessions list|search|delete`; `grok export <SESSION_ID> [file]`; `grok usage <SESSION_ID>`.
+- **Agent without the TUI:** `grok agent stdio|headless|serve|leader`. Most hosts stay on `-p`.
 - **Env:** `GROK_MEMORY=0` (prefer over `--no-memory`), `GROK_HOME`, `GROK_SANDBOX`, `GROK_DISABLE_AUTOUPDATER=1`, `GROK_EXTRA_CA_BUNDLE`.
-- **Pointers:** `grok clone`, `grok memory clear` — tables in `references/flags-1.0.md`. ACP: `grok agent stdio`; most hosts stay on `-p`.
+- **Pointers:** `grok clone`, `grok memory clear` — tables in `references/flags-1.0.md`. `share` and `workspace` still answer `grok <cmd> --help` but are omitted from default `--help` and are not recipes.
 
 ## Failure modes (host must handle)
 
@@ -183,10 +186,10 @@ Token policy: uncached `input_tokens` + `cache_read_input_tokens` + `cache_creat
 |---------|-----|
 | Hang / browser | `grok login` / `--device-auth`; check credentials |
 | Dead-flag errors (`--best-of-n`, `--check`, `--self-verify`) | Remove flags; host multi-run + tests |
-| Expected worktree missing under `-p` | Host `git worktree` + `--cwd`; do not rely on `-p --worktree` |
+| `--worktree` rejected with `--fork-session` | Drop one of the two. `--ref` is a clean checkout (no dirty overlay) |
 | Permission prompts | `--always-approve` or narrow `--allow`/`--deny` |
 | Non-UUID `-s` | `uuidgen` lowercase UUID for create only |
-| Wrong model | `grok models`; fallback `grok-4.6` (`grok-4.5` still available) |
+| Wrong model | `grok models`; fallback `grok-4.7` (`grok-4.7-build-fast`, `grok-4.6`, `grok-4.5` still available) |
 | Remote resume without code | Add `--restore-code` + `--worktree` |
 | Missing cost fields | Unreported, not free |
 | Exit 130/143 | Resume; re-verify files |
@@ -197,7 +200,7 @@ Full tables: `references/failure-modes.md`, `references/flags-1.0.md`, `referenc
 
 ```bash
 grok doctor && grok inspect && grok models
-MODEL="${MODEL:-grok-4.6}"
+MODEL="${MODEL:-grok-4.7}"
 grok -p "/imagine ..." --cwd ./out --always-approve --no-auto-update
 grok -p "<task>" -m "$MODEL" --cwd "$REPO" --output-format json \
   --always-approve --no-auto-update 2>/dev/null | jq -r '.text // empty'
@@ -205,7 +208,7 @@ SID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 grok -s "$SID" -p "..." --cwd "$REPO" --always-approve
 grok -r "$SID" -p "..." --always-approve --cwd "$REPO"
 # NOT valid: --best-of-n, --check, --self-verify
-# NOT magic: -p --worktree  (no worktree creation in headless)
+# --worktree creates a git worktree; not combinable with --fork-session
 ```
 
 ## Sources

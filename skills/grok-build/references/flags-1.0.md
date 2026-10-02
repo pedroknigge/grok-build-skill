@@ -1,6 +1,6 @@
-# Grok Build CLI 1.0.13 — flags reference
+# Grok Build CLI 1.0.48 — flags reference
 
-Verified against live `grok 1.0.13` (`grok --help`, clap-generated completions under `~/.grok/completions/`, and `~/.grok/docs/user-guide/14-headless-mode.md`). Several flags are **omitted from default `--help`** but are live (completions + clap): `--memory-flush`, `--background-wait-timeout`, `--load`, `--compaction-mode`, `--compaction-detail`, `--no-ask-user`, `--no-wait-for-background`, `--no-memory`, `--experimental-memory`, `--no-auto-update`. `--yolo` is a hidden alias of `--always-approve`.
+Verified against live `grok 1.0.48 (b94d5072c95f) [alpha]` (`grok --help`, clap-generated completions under `~/.grok/completions/`, and `~/.grok/docs/user-guide/14-headless-mode.md`). Several flags are **omitted from default `--help`** but are live in completions: `--memory-flush`, `--background-wait-timeout`, `--load`, `--compaction-mode`, `--compaction-detail`, `--no-ask-user`, `--no-wait-for-background`, `--no-memory`, `--experimental-memory`, `--no-auto-update`. `--yolo` is a hidden alias of `--always-approve`: default `--help` and the completion option lists omit the name; `grok --yolo --version` still accepts it.
 
 ## Dead flags (error if used)
 
@@ -27,8 +27,8 @@ Stdin is **not** the prompt.
 
 | Flag | Purpose |
 |------|---------|
-| `-m, --model <MODEL>` | Model ID. Discover with `grok models`. Default today **`grok-4.6`**; **`grok-4.5`** is still available. |
-| `--reasoning-effort` / `--effort` | Canonical levels: `none \| minimal \| low \| medium \| high \| xhigh \| max`. A model only accepts advertised levels. **`grok-4.6` extra effort `xhigh`** (4.5 menu has no `xhigh`). |
+| `-m, --model <MODEL>` | Model ID. Discover with `grok models`. Default today **`grok-4.7`**. Still available: **`grok-4.7-build-fast`**, **`grok-4.6`**, **`grok-4.5`**. |
+| `--reasoning-effort` / `--effort` | Canonical levels: `none \| minimal \| low \| medium \| high \| xhigh \| max`. A model only accepts the levels its menu advertises. Do not assume an effort tier for `grok-4.7` beyond that list. |
 | `--max-turns <N>` | Max agent turns (**headless-only** per user-guide; default `grok --help` does not print that restriction) |
 | `--rules <TEXT>` | Append rules to system prompt |
 | `--system-prompt-override <PROMPT>` | Replace system prompt (alias `--system-prompt`) |
@@ -40,18 +40,18 @@ Stdin is **not** the prompt.
 | Flag | Purpose |
 |------|---------|
 | `-s, --session-id <UUID>` | **Create** new session; must be valid UUID not already present. Does **not** resume. With resume/continue only valid with `--fork-session`. |
-| `-r, --resume [ID\|title]` | Resume by ID or title; omit → most recent. UUID-shaped values always mean IDs. Scripts prefer UUID. |
+| `-r, --resume [ID\|title]` | Resume by ID or current-directory title (case-insensitive); omit → most recent. UUID-shaped values always mean IDs. A sole renamed title wins; other duplicate titles fail as ambiguous. Scripts prefer UUID. |
 | `--load <ID>` | Alias of `--resume`. |
 | `-c, --continue` | Most recent session for current directory |
-| `--fork-session` | Fork into a new session ID on resume/continue |
+| `--fork-session` | Fork into a new session ID on resume/continue. Not combinable with `--worktree`. |
 | `--restore-code` | With **`--resume` only**: restore original session repo snapshot. Without it, conversation only. Remote sessions need **`--worktree`** (never checkout into CWD). |
 
 ## Worktree
 
 | Flag | Purpose |
 |------|---------|
-| `-w, --worktree [NAME]` | New git worktree for the session (interactive / non-magic headless). **Headless (`-p`) does not create a worktree from this flag.** With remote resume + `--restore-code`, required to apply snapshot code. |
-| `--worktree-ref` / `--ref` | Base branch/tag/commit for worktree |
+| `-w, --worktree [NAME]` | **Creates a git worktree** from the current checkout (dirty changes included) and runs the session there, including under `-p`. A subdirectory launch lands in that same relative directory. With `-r`, the session resumes into the new worktree. Not combinable with `--fork-session`. Remote resume + `--restore-code` applies the snapshot codebase here (conversation restores either way). |
+| `--worktree-ref` / `--ref` | Branch, tag, or commit to base the worktree on. Clean checkout, no dirty overlay. |
 | `--cwd <PATH>` | Execute as if from this directory |
 
 ## Output
@@ -111,10 +111,11 @@ Process-wide memory off: prefer **`GROK_MEMORY=0`**. `--no-memory` / `--experime
 | `grok mcp list\|enable\|disable\|doctor` | MCP management (`--json` on list/doctor). `grok mcp add` auto-http for bare `http(s)://` URLs |
 | `grok sessions list\|search\|delete` | Session index |
 | `grok export <ID> [file]` | Export transcript as Markdown (`-c` / `--clipboard`) |
-| `grok worktree list\|rm\|gc` | Worktree cleanup (`ls` alias; `show`; `detach`; `gc --max-age`). Also live, not recipes: `salvage`, `clean-artifacts`, `db` |
-| `grok clone <url> [dir]` | Grove lazy-clone (NFS macOS / FUSE Linux). Gated `[clone] enabled = true` in Grove config. Default **depth-1** selected branch; `--full-history` for full clone; `--branch` / `--cone`. 1.0.10+ can reuse a matching local checkout as a linked worktree. |
+| `grok usage <SESSION_ID> [TURN]` | Persisted token and cost usage. Omit `TURN` for session totals and every recorded turn |
+| `grok worktree create\|list\|rm\|gc` | `create` makes a worktree the way `grok -w` does, without starting a session. Cleanup: `list` (`ls`), `rm`, `gc`. Also live, not recipes: `show`, `detach`, `salvage`, `clean-artifacts`, `redirect`, `db` |
+| `grok clone <url> [dir]` | Grove lazy-clone (NFS macOS / FUSE Linux). `--branch` / `--full-history`. Help on this build does not list `--cone`. |
 | `grok memory clear` | Cross-session memory (`--workspace` / `--global` / `--all` / `-y`) |
-| `grok agent stdio` | ACP long-lived integration (most hosts stay on `-p`) |
+| `grok agent stdio\|headless\|serve\|leader` | Run without the interactive UI. `stdio` is ACP; `headless` is the WebSocket relay; `serve` is a WebSocket server; `leader` is the shared leader. Most hosts stay on `-p` |
 
 Low-priority (not skill recipes): `grok du`/`disk-usage`, `trace`, `dashboard`, `wrap`, `share`, `setup`, `plugin`, `leader`, `workspace`, `completions`.
 

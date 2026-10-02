@@ -127,16 +127,30 @@ for concept in \
   "streaming-messages-json" \
   "include-partial-messages" \
   "grok doctor" \
+  "grok-4.7" \
+  "grok-4.7-build-fast" \
   "grok-4.6" \
   "grok-4.5" \
   "restore-code" \
-  "does not create a worktree"
+  "1.0.48" \
+  "creates a git worktree" \
+  '${MODEL:-grok-4.7}'
 do
   if ! grep -F -q -- "$concept" "$CODEX_FILE"; then
     echo "FAIL: Codex AGENTS.md missing contract string: $concept"
     exit 1
   fi
 done
+retired_worktree="does not create a ""worktree"
+retired_fallback='${MODEL:-grok-4.'"6}"
+if grep -F -q -- "$retired_worktree" "$CODEX_FILE"; then
+  echo "FAIL: Codex AGENTS.md still teaches the retired headless worktree sentence"
+  exit 1
+fi
+if grep -F -q -- "$retired_fallback" "$CODEX_FILE"; then
+  echo "FAIL: Codex AGENTS.md still uses the previous model fallback"
+  exit 1
+fi
 if ! grep -E -q 'NOT valid:.*--best-of-n|--best-of-n.*dead|Dead flags' "$CODEX_FILE"; then
   # Also accept explicit ban lines from SKILL.md quick reference
   if ! grep -F -q -- "--best-of-n" "$CODEX_FILE"; then

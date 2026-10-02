@@ -2,7 +2,7 @@
 
 > Hub: [AGENTS.md](../AGENTS.md)
 
-**Last updated:** 2026-08-30
+**Last updated:** 2026-10-01
 
 ## Problem
 
@@ -16,13 +16,13 @@ Host coding agents (Claude Code, Grok, Antigravity/AGY, Codex, others) need a **
 
 ## Promise
 
-Once installed, the host learns the **current** headless contract: discover models first, use UUID sessions, stream JSON when needed, isolate via host worktrees + `--cwd` (not magic `-p --worktree`), and prefer native host tools when they already cover the request.
+Once installed, the host learns the **current** headless contract: discover models first, use UUID sessions, stream JSON when needed, isolate with `--worktree` (it creates a git worktree; not combinable with `--fork-session`), and prefer native host tools when they already cover the request.
 
 ## Outcomes
 
 - A single skill directory (`SKILL.md` + six references) installs into the agents this repo actually supports.
 - Re-install is idempotent; uninstall is clean.
-- Validators fail the tree if the contract (3.x, dead flags, `grok-4.6` / `grok-4.5`, worktree caveat) is taught incorrectly.
+- Validators fail the tree if the contract (3.x, dead flags, fallback `grok-4.7`, or `--worktree` creating a git worktree) is taught incorrectly.
 
 ## Non-goals
 

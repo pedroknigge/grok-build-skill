@@ -51,7 +51,7 @@ CI is a linear job on `ubuntu-latest`. Live `grok` is not required on Actions; s
 ## Edge cases & risks
 
 - `--check` in `grok update --check` is live; the validator only fails `grok … --check` recipe lines without dead/forbidden context.
-- Model presence (`grok-4.6` / `grok-4.5`) in `grok models` is WARN-only in sync-check (environment-specific).
+- When `grok models` succeeds, sync-check requires `Default model: grok-4.7` plus `grok-4.7-build-fast`, `grok-4.6`, and `grok-4.5`. Auth failure stays a warning.
 
 ## Related docs
 

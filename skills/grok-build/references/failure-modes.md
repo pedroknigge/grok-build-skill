@@ -1,11 +1,11 @@
-# Failure modes (CLI 1.0.13)
+# Failure modes (CLI 1.0.48)
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Hangs or tries to open browser | Not logged in / no cached credentials | `grok login`, or `grok login --device-auth` for headless/remote. Check `grok inspect`. |
 | Auth failures with API key | Invalid or stale `XAI_API_KEY` | Fix key or prefer session token via `grok login`. Session token wins when present. |
 | `unexpected argument '--best-of-n'` / `--check` / `--self-verify` | Dead flags on CLI 1.0 | Remove flags. Host multi-run + project tests. See `quality-without-best-of-n.md`. `--check` is only `grok update --check`. |
-| Expected worktree not created under `-p` | Headless ignores worktree creation | Use host `git worktree add` + `--cwd`, or non-headless worktree; for remote restore use `--restore-code --worktree`. |
+| `--worktree` rejected, or the worktree lacks dirty files | `--worktree` is not combinable with `--fork-session`. `--ref` / `--worktree-ref` is a clean checkout with no dirty overlay | Drop `--fork-session` when you need the worktree. Omit `--ref` when the dirty checkout should come along. |
 | Repeated permission prompts | No auto-approve / restrictive policy | `--always-approve` / `--yolo`, or better: `--allow` + `--deny` + modes like `dontAsk` / `bypassPermissions`. |
 | Wrong repo context | Missing/incorrect `--cwd` | Always pass `--cwd "$REPO_ROOT"`. |
 | Invalid session id / create failed | Non-UUID `-s` or reusing existing UUID | `uuidgen` lowercase for **new** sessions; resume with `-r`/`--load`/`-c`. |
@@ -13,7 +13,7 @@
 | `--restore-code` rejected | Missing `--resume` | Always pair: `--resume <id> --restore-code`. |
 | Remote resume without code changes | Conversation-only restore | Add `--restore-code` and `--worktree` for remote. |
 | Noisy output / appears stuck | Hook/plugin/MCP/permission spam | `2>/dev/null`, `jq -r '.text'`, strict final-report prompt, tool restrictions, `--max-turns`, `--no-auto-update`. |
-| Unknown model | Hard-coded old name (`grok-build` may be absent) | Always `grok models` first; fallback **`grok-4.6`**. **`grok-4.5`** is still available. |
+| Unknown model | Hard-coded old name (`grok-build` may be absent) | Always `grok models` first; fallback **`grok-4.7`**. **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** are still available. |
 | MCP calls fail | Skipped schema discovery | Teach `search_tool` → `use_tool`; host: `grok mcp doctor`. |
 | Subagents/plan unavailable | Disabled | Check `--no-subagents` / `--no-plan`; `grok inspect`; config. |
 | Structured output needed | Free text for machines | `--json-schema` + `--output-format json`. |
@@ -21,7 +21,7 @@
 | Exit 130 / 143 | SIGINT / SIGTERM | Resume with `--resume` / `-c`; re-verify files. |
 | Expected background work gone after exit | Headless kills bg tasks on exit | Finish work inside the turn, use host-side verification, or `--no-wait-for-background` only when intentional. Bound wait with `--background-wait-timeout`. |
 | Cross-session memory leaking into scripts | Memory enabled in config/remote | Prefer **`GROK_MEMORY=0`** for the process. `--no-memory` is legacy compat. |
-| Version too old for this skill | Pre-1.0.13 CLI | Upgrade: `grok update` or reinstall; skill targets **1.0.13+**. |
+| Version too old for this skill | Not this build | Upgrade: `grok update` or reinstall; skill targets **1.0.48** (`b94d5072c95f`) `[alpha]`. |
 
 ## Since 1.0.0 (headless reliability)
 

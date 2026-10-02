@@ -2,14 +2,14 @@
 
 > Hub: [AGENTS.md](../AGENTS.md)
 
-**Last updated:** 2026-08-30
+**Last updated:** 2026-10-01
 
 This is a **tracking skill**, not a product with release trains. The work is: stay honest against the live `grok` CLI.
 
 ## Now (shipped)
 
-- Skill **3.2** / CLI **1.0.13+**
-- Default model **`grok-4.6`**; **`grok-4.5`** still documented
+- Skill **3.3** / CLI **1.0.48**
+- Default model **`grok-4.7`**; **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** still documented
 - Dead quality flags removed from recipes
 - Six installer destinations, including both AGY global roots; Codex remains embed-only
 - Validate + FAKE_HOME smoke + optional `sync-check-cli.sh`

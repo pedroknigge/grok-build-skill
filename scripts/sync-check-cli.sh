@@ -19,8 +19,9 @@ echo "→ sync-check-cli: comparing skill contract to live grok"
 
 VERSION_OUT="$(grok --version 2>&1 || true)"
 echo "  grok --version: $VERSION_OUT"
-if ! echo "$VERSION_OUT" | grep -Eq '1\.|[0-9]+\.[0-9]+'; then
-  echo "WARN: unexpected version string"
+if ! echo "$VERSION_OUT" | grep -Fq '1.0.48'; then
+  echo "FAIL: skill contract targets grok 1.0.48; live binary is: $VERSION_OUT"
+  exit 1
 fi
 
 HELP="$(grok --help 2>&1 || true)"
@@ -55,9 +56,26 @@ if ! echo "$HELP" | grep -F -q -- "streaming-messages-json"; then
   exit 1
 fi
 
-# Headless worktree caveat should appear in help text for --worktree
-if ! echo "$HELP" | grep -Eiq 'Headless.*does not create a worktree|does not create a worktree from this flag'; then
-  echo "WARN: worktree headless caveat wording changed in --help; verify skill text"
+# --worktree creates a git worktree on this binary (including headless)
+if ! echo "$HELP" | grep -Fq 'new git worktree'; then
+  echo "FAIL: grok --help no longer says --worktree starts a new git worktree"
+  exit 1
+fi
+retired_worktree="does not create a ""worktree"
+if echo "$HELP" | grep -Fq "$retired_worktree"; then
+  echo "FAIL: grok --help still uses the retired worktree sentence; re-audit the skill"
+  exit 1
+fi
+GUIDE="${HOME}/.grok/docs/user-guide/14-headless-mode.md"
+if [[ -f "$GUIDE" ]]; then
+  if ! grep -Fq 'Not combinable with `--fork-session`' "$GUIDE"; then
+    echo "FAIL: headless guide no longer says --worktree is not combinable with --fork-session"
+    exit 1
+  fi
+  if ! grep -Fq 'Create a git worktree' "$GUIDE"; then
+    echo "FAIL: headless guide no longer describes --worktree as creating a worktree"
+    exit 1
+  fi
 fi
 
 # Skill must not teach dead flags operationally (delegate to validate-skill)
@@ -73,25 +91,38 @@ for flag in --best-of-n --self-verify; do
 done
 
 # Required skill strings
-for s in streaming-messages-json include-partial-messages grok-4.6 grok-4.5 restore-code "grok doctor"; do
+for s in streaming-messages-json include-partial-messages grok-4.7 grok-4.7-build-fast grok-4.6 grok-4.5 restore-code "grok doctor" "1.0.48" "creates a git worktree"; do
   if ! grep -R -F -q -- "$s" "$SKILL" "$REF_DIR" 2>/dev/null; then
     echo "FAIL: skill corpus missing required string: $s"
     exit 1
   fi
 done
+retired_worktree="does not create a ""worktree"
+retired_fallback='${MODEL:-grok-4.'"6}"
+if grep -R -F -q -- "$retired_worktree" "$SKILL" "$REF_DIR" 2>/dev/null; then
+  echo "FAIL: skill still teaches the retired headless worktree sentence"
+  exit 1
+fi
+if grep -R -F -q -- "$retired_fallback" "$SKILL" "$REF_DIR" 2>/dev/null; then
+  echo "FAIL: skill still uses the previous model fallback"
+  exit 1
+fi
 
-# Quick models check if logged in (non-fatal; grok-4.5 absence is WARN only)
+# Models: when `grok models` succeeds, the printed default and the still-available set are required
 if MODELS_OUT="$(grok models 2>&1)"; then
-  if echo "$MODELS_OUT" | grep -Fq 'grok-4.6'; then
-    echo "  models: grok-4.6 present"
-  else
-    echo "WARN: grok-4.6 not listed by grok models (environment-specific)"
+  if ! echo "$MODELS_OUT" | grep -Fq 'Default model: grok-4.7'; then
+    echo "FAIL: grok models default is not grok-4.7"
+    echo "$MODELS_OUT"
+    exit 1
   fi
-  if echo "$MODELS_OUT" | grep -Fq 'grok-4.5'; then
-    echo "  models: grok-4.5 present"
-  else
-    echo "WARN: grok-4.5 not listed by grok models (environment-specific)"
-  fi
+  echo "  models: default grok-4.7"
+  for model in grok-4.7-build-fast grok-4.6 grok-4.5; do
+    if ! echo "$MODELS_OUT" | grep -Fq "$model"; then
+      echo "FAIL: grok models did not list $model"
+      exit 1
+    fi
+    echo "  models: $model present"
+  done
 else
   echo "WARN: grok models failed (auth?); skipped model presence check"
 fi

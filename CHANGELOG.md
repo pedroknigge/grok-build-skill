@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.3 — 2026-10-01
+
+### Grok Build CLI 1.0.48
+
+Accuracy bump against live `grok 1.0.48 (b94d5072c95f) [alpha]` (`grok --version`, `grok models`, `grok --help`, completions, `grok <cmd> --help`, and `~/.grok/docs/user-guide/14-headless-mode.md`).
+
+- Fallback string is **`grok-4.7`** (`Default model` from `grok models`). Still available: **`grok-4.7-build-fast`**, **`grok-4.6`**, **`grok-4.5`**. Effort stays the canonical list; a model accepts only advertised levels.
+- **`--worktree` creates a git worktree** from the current checkout, including under `-p`. Dirty changes are included. A subdirectory launch lands in that same relative directory. **`--ref` / `--worktree-ref`** is a clean checkout. **`-r` resumes into the new worktree.** Not combinable with **`--fork-session`**.
+- Resume matches live help: current-directory titles are case-insensitive; UUID-shaped values are always IDs; a sole renamed title wins; other duplicate titles fail as ambiguous. `--load` remains an alias of `--resume`. `--restore-code` still requires `--resume`; remote code restore still requires `--worktree`.
+- Headless additions at the existing depth: `grok usage`, `grok worktree create`, and `grok agent` modes `headless`, `serve`, and `leader` in addition to `stdio`. `share` and `workspace` still answer `grok <cmd> --help` and stay off the recipe list. `grok clone` help on this build does not list `--cone`.
+- Dead `-p` flags stay dead: `--best-of-n`, `--self-verify`; `--check` is only `grok update --check`.
+- Installer banner **v3.3 / CLI 1.0.48 / default grok-4.7**. Validators reject the old worktree sentence and a `grok-4.6` fallback.
+
 ## v3.2 — 2026-08-30
 
 ### Native Antigravity / AGY packaging

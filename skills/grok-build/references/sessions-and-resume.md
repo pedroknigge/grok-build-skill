@@ -1,13 +1,13 @@
-# Sessions and resume (CLI 1.0.13)
+# Sessions and resume (CLI 1.0.48)
 
 ## Create vs resume
 
 | Action | Flag | Rules |
 |--------|------|-------|
 | Create | `-s` / `--session-id <UUID>` | Must be a **valid UUID** that does not already exist. **Does not resume.** Nicknames (`feat-123`) fail. |
-| Resume | `-r` / `--resume [ID\|title]` | Resume by session ID or title; omit for most recent. **`--load <ID>` is an alias of `--resume`.** |
+| Resume | `-r` / `--resume [ID\|title]` | Resume by session ID or a current-directory title (case-insensitive); omit for most recent. UUID-shaped values are always IDs. A sole renamed title wins; other duplicate titles fail as ambiguous. **`--load` is an alias of `--resume`.** |
 | Continue | `-c` / `--continue` | Most recent session for the **current directory**. |
-| Fork | `--fork-session` | With resume/continue: new session ID (optionally named via `-s` UUID). |
+| Fork | `--fork-session` | With resume/continue: new session ID (optionally named via `-s` UUID). Not combinable with `--worktree`. |
 
 Default headless: each `grok -p` creates a **fresh** session unless you resume/continue.
 
@@ -51,9 +51,11 @@ grok -p "Continue." --resume "$SID" --restore-code --worktree restore-"$SID" --a
 
 ## Worktree + sessions
 
-- Interactive sessions can create worktrees with `-w/--worktree`.
-- **Headless (`-p`) does not create a worktree from `--worktree`.**
-- For headless isolation: `git worktree add ...` then `--cwd` into that path, or restore remote code with `--restore-code --worktree`.
+- `-w` / `--worktree [NAME]` **creates a git worktree** from the current checkout and runs the session there, including `grok -p`. Dirty changes are included. A subdirectory launch lands in that same relative directory.
+- `--ref` / `--worktree-ref` is a clean checkout of that branch, tag, or commit, with no dirty overlay.
+- With `-r`, the session resumes into the new worktree. `--worktree` is not combinable with `--fork-session`.
+- Remote code restore still uses `--restore-code` together with `--worktree` (never checks out into the current directory).
+- `grok worktree create` makes the same worktree without starting a session. Cleanup: `grok worktree list|rm|gc`.
 
 ## Session management CLI
 

@@ -2,7 +2,7 @@
 
 Origin already exists: [pedroknigge/grok-build-skill](https://github.com/pedroknigge/grok-build-skill). This is a **bump → checksum → push → optional tag** recipe, not a first-create bootstrap (`git init` / `gh repo create` / `<your-user>`).
 
-Target surface for consumers: **Grok Build CLI 1.0.13+**, skill version **3.2**.
+Target surface for consumers: **Grok Build CLI 1.0.48**, skill version **3.3**.
 
 ## Gate (must pass before push)
 
@@ -23,7 +23,7 @@ Do **not** publish until validate + install-smoke pass. Do **not** run `./instal
 3. Bump frontmatter `version` (stay 3.x) and `last-updated`.
 4. Update `CHANGELOG.md`, `README.md`, and installer banners in the same change.
 5. Keep both AGY destinations documented and tested: `~/.gemini/config/skills/grok-build` and `~/.gemini/antigravity-cli/skills/grok-build`; never `~/.agy/skills`.
-6. Model fallback: **`grok-4.6`**. Keep a **`grok-4.5`** mention (still available) so validators pass.
+6. Model fallback: **`grok-4.7`**. Keep **`grok-4.7-build-fast`**, **`grok-4.6`**, and **`grok-4.5`** mentions (still available) so validators pass.
 7. Do not teach `--best-of-n`, `--check`, or `--self-verify` as live `-p` flags.
 
 ## Checksums
@@ -85,7 +85,7 @@ Cut a new tag/release (deliver may use **`v3.2.0`**) so those URLs can move:
 ```bash
 git tag v3.2.0
 git push origin v3.2.0
-gh release create v3.2.0 --title "v3.2.0" --notes "Skill 3.2 adds native AGY discovery and keeps the Grok Build CLI 1.0.13+ contract."
+gh release create v3.2.0 --title "v3.2.0" --notes "Skill 3.2 adds native AGY discovery and keeps that release's headless contract."
 ```
 
 Keep the README public one-liner on `main`, not the tag.

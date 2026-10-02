@@ -2,7 +2,7 @@
 
 > Hub: [AGENTS.md](../AGENTS.md) · Decisions: [docs/decisions/](./decisions/) · Features: [docs/features/](./features/)
 
-**Last updated:** 2026-08-30
+**Last updated:** 2026-10-01
 
 ## Overview
 
@@ -22,7 +22,7 @@ flowchart LR
   Installer --> AgyCli["~/.gemini/antigravity-cli/skills/grok-build/"]
   Installer --> Codex["~/.codex/AGENTS.md\nBEGIN/END markers"]
   Host[Host agent] --> SkillDir
-  Host --> GrokBin["grok CLI 1.0.13+\nheadless -p"]
+  Host --> GrokBin["grok CLI 1.0.48\nheadless -p"]
 ```
 
 ## Components

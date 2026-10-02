@@ -2,14 +2,14 @@
 
 > Hub: [AGENTS.md](../AGENTS.md) · Architecture: [architecture.md](./architecture.md)
 
-**Last updated:** 2026-08-30  
+**Last updated:** 2026-10-01  
 Inferred from **code** (installer, scripts, skill files). Evidence column is the authority.
 
 | ID | Requirement | Evidence | Feature pack |
 |----|-------------|----------|--------------|
 | RF-001 | Skill metadata is 3.x with required frontmatter keys | `scripts/validate-skill.sh` | [grok-build-skill](./features/grok-build-skill/README.md) |
 | RF-002 | Entrypoint contains When to use, Native Grok, Breaking changes, Preflight, Headless usage, Quick reference | `scripts/validate-skill.sh` | grok-build-skill |
-| RF-003 | Entrypoint documents CLI 1.0.13+ family, `streaming-messages-json`, `--include-partial-messages`, `grok doctor`, `grok-4.6`, `grok-4.5`, `--restore-code`, worktree caveat | `scripts/validate-skill.sh` | grok-build-skill |
+| RF-003 | Entrypoint documents CLI 1.0.48, `streaming-messages-json`, `--include-partial-messages`, `grok doctor`, fallback `grok-4.7`, still-available `grok-4.7-build-fast` / `grok-4.6` / `grok-4.5`, `--restore-code`, and that `--worktree` creates a git worktree | `scripts/validate-skill.sh` | grok-build-skill |
 | RF-004 | Six references exist: `flags-1.0.md`, `output-formats.md`, `sessions-and-resume.md`, `failure-modes.md`, `quality-without-best-of-n.md`, `prompt-templates.md` | `install.sh` `REFERENCE_FILES`; `validate-skill.sh` | grok-build-skill |
 | RF-005 | Operational recipes must not pass `--best-of-n`, `--self-verify`, or `grok … --check` | `validate-skill.sh` `fail_operational_dead_flags` | grok-build-skill |
 | RF-006 | No nickname `-s` examples (`img-session`, `feat-123`, `feat-xyz`); create uses UUID | `validate-skill.sh` | grok-build-skill |

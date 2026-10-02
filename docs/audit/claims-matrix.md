@@ -4,18 +4,18 @@
 > **Code is source of truth.** Docs do not override implementation.  
 > **Living claims v0:** anchors + severity.
 
-**Date:** 2026-08-30  
+**Date:** 2026-10-01  
 **Scope:** project  
 **Intent:** audit → selective patch  
 **Out:** root  
 **Auditor:** documentation-manager  
-**CLI evidence:** `grok 1.0.13 (5e9a58528b76)`; `grok models` default `grok-4.6`, `grok-4.5` listed
+**CLI evidence:** `grok 1.0.48 (b94d5072c95f) [alpha]`; `grok models` default `grok-4.7`; still listed: `grok-4.7-build-fast`, `grok-4.6`, `grok-4.5`
 
 ## Summary
 
 | Verdict | Count |
 |---------|------:|
-| OK | 33 |
+| OK | 36 |
 | Partial | 0 |
 | Missing | 0 |
 | Contradicted | 0 |
@@ -24,9 +24,9 @@
 | Severity | Count |
 |----------|------:|
 | critical | 16 |
-| normal | 20 |
+| normal | 23 |
 
-**Truth score (advisory):** `(33*100 + 0*50) / 36` ≈ **91.7** (Unverifiable counted in TOTAL_V)
+**Truth score (advisory):** `(36*100 + 0*50) / 39` ≈ **92.3** (Unverifiable counted in TOTAL_V)
 **CI gate:** this repo has **no** `scripts/audit-claims.sh`. Gate here is `validate-skill.sh` + smoke + checksums. No **critical Contradicted**.
 
 **Top risks (pre-patch, now fixed in-tree):**  
@@ -48,19 +48,19 @@
 | Data layer | none | |
 | Jobs / workers | `.github/workflows/ci.yml` | validate + checksum + smoke + optional sync |
 | Tests | `scripts/validate-skill.sh`, `install-smoke.sh`, `sync-check-cli.sh` | No `*_test.go` / pytest |
-| External runtime | user `grok` binary 1.0.13+ | Documented, not vendored |
+| External runtime | user `grok` binary 1.0.48 | Documented, not vendored |
 
 ## Claims matrix
 
 | ID | Claim (quote or paraphrase) | Source doc | Code evidence | Anchor path | Anchor symbol | Anchor hash | Severity | Verdict | Action |
 |----|----------------------------|------------|---------------|-------------|---------------|-------------|----------|---------|--------|
-| C-001 | Skill metadata version is 3.x / 3.2 | SKILL.md frontmatter | `version: "3.2"` | `skills/grok-build/SKILL.md` | `metadata.version` | | critical | OK | keep |
-| C-002 | Entrypoint ≤220 lines | README / PUBLISH | `wc -l` → 214 | `skills/grok-build/SKILL.md` | | | normal | OK | keep |
+| C-001 | Skill metadata version is 3.x / 3.3 | SKILL.md frontmatter | `version: "3.3"` | `skills/grok-build/SKILL.md` | `metadata.version` | | critical | OK | keep |
+| C-002 | Entrypoint ≤220 lines | README / PUBLISH | `wc -l` → 217 | `skills/grok-build/SKILL.md` | | | normal | OK | keep |
 | C-003 | Exactly six reference files with those names | README, install.sh | `REFERENCE_FILES` + dir listing | `install.sh` | `REFERENCE_FILES` | | critical | OK | keep |
-| C-004 | Target surface Grok Build CLI 1.0.13+ | SKILL.md, README | frontmatter focus; live `grok 1.0.13` | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
-| C-005 | Default / fallback model `grok-4.6`; `grok-4.5` still available | SKILL.md | `grok models` lists both; default 4.6 | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
+| C-004 | Target surface Grok Build CLI 1.0.48 | SKILL.md, README | frontmatter focus; live `grok 1.0.48 (b94d5072c95f) [alpha]` | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
+| C-005 | Default / fallback model `grok-4.7`; `grok-4.7-build-fast`, `grok-4.6`, and `grok-4.5` still available | SKILL.md | `grok models` prints `Default model: grok-4.7` and lists the other three | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
 | C-006 | Dead `-p` flags: `--best-of-n`, `--self-verify`; `--check` only `grok update --check` | SKILL.md, flags-1.0.md | not in `grok --help`; `grok update --help` has `--check` | `skills/grok-build/references/flags-1.0.md` | | | critical | OK | keep |
-| C-007 | Headless (`-p`) does not create a worktree from `--worktree` | SKILL.md | `grok --help` worktree text | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
+| C-007 | `--worktree` creates a git worktree (dirty included; `--ref` is clean; not combinable with `--fork-session`) | SKILL.md | `grok --help` "new git worktree"; user-guide Additional Headless Flags | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
 | C-008 | Four output formats including `streaming-messages-json` + `--include-partial-messages` | SKILL.md, output-formats.md | `grok --help` | `skills/grok-build/references/output-formats.md` | | | critical | OK | keep |
 | C-009 | `--load` is alias of `--resume` | SKILL.md, sessions-and-resume.md | zsh completions `--load` alias | `skills/grok-build/references/sessions-and-resume.md` | | | normal | OK | keep |
 | C-010 | `-s/--session-id` creates UUID sessions; nicknames fail | SKILL.md | `grok --help` session-id text; validator bans nicknames | `skills/grok-build/SKILL.md` | | | critical | OK | keep |
@@ -76,9 +76,9 @@
 | C-020 | `SHA256SUMS` covers install.sh + SKILL.md + six refs only | PUBLISH.md | file contents; `shasum -c` OK | `SHA256SUMS` | | | critical | OK | keep |
 | C-021 | CI runs validate, checksum, smoke, optional sync | README | `.github/workflows/ci.yml` | `.github/workflows/ci.yml` | | | normal | OK | keep |
 | C-022 | `sync-check-cli.sh` skips if grok missing | README | early `exit 0` | `scripts/sync-check-cli.sh` | | | normal | OK | keep |
-| C-023 | Validator requires grok-4.6 and grok-4.5 mentions | CHANGELOG, validate-skill.sh | `REQUIRED_CONCEPTS` | `scripts/validate-skill.sh` | | | normal | OK | keep |
-| C-024 | Hidden-from-`--help` flags still live in completions | flags-1.0.md | `~/.grok/completions/` lists them | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep (`--no-auto-update` added to list) |
-| C-025 | Effort canonical list includes `xhigh`; grok-4.6 extra `xhigh` | flags-1.0.md | user-guide 14-headless-mode.md | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-023 | Validator requires fallback `grok-4.7` plus `grok-4.7-build-fast`, `grok-4.6`, and `grok-4.5` | CHANGELOG, validate-skill.sh | `REQUIRED_CONCEPTS` | `scripts/validate-skill.sh` | | | normal | OK | keep |
+| C-024 | Hidden-from-`--help` flags still live in completions; `--yolo` is accepted by the binary and omitted from completion lists | flags-1.0.md | `~/.grok/completions/` lists the set except `--yolo`; `grok --yolo --version` exits 0 | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-025 | Effort canonical list includes `xhigh`; a model accepts only advertised levels | flags-1.0.md | user-guide 14-headless-mode.md | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-026 | MCP: list/enable/disable/doctor; add auto-http for bare URLs | SKILL.md, flags-1.0.md | `grok mcp --help`; `mcp add --help` transport http default on URL | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-027 | Sessions CLI: list/search/delete; export Markdown + `-c` | flags-1.0.md | `grok sessions --help`; `grok export --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-028 | `grok memory clear` with `--workspace` / `--global` / `--all` / `-y` | flags-1.0.md | `grok memory clear --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
@@ -87,7 +87,10 @@
 | C-031 | `stopReason` snake_case (`end_turn`) in JSON | SKILL.md, output-formats.md | user-guide / skill contract; no in-repo fixture JSON | `skills/grok-build/references/output-formats.md` | | | normal | Unverifiable | keep (matches live docs; no captured JSON in this repo) |
 | C-032 | SIGINT 130 / SIGTERM 143 | SKILL.md, sessions-and-resume.md | documented in skill; not executed this audit | `skills/grok-build/references/sessions-and-resume.md` | | | normal | Unverifiable | keep |
 | C-033 | `grok clone` Grove lazy-clone; gated Grove config; depth-1 default | flags-1.0.md | `grok clone --help` confirms flags; Grove gate not executed | `skills/grok-build/references/flags-1.0.md` | | | normal | Unverifiable | keep (help OK; gate Unverifiable) |
-| C-034 | Worktree cleanup recipes are list/rm/gc; salvage / clean-artifacts / db exist and are not recipes | flags-1.0.md | `grok worktree --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-034 | Worktree commands include `create`, `list`, `rm`, `gc`; salvage / clean-artifacts / redirect / db exist and are not recipes | flags-1.0.md | `grok worktree --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-037 | `grok usage` prints persisted token and cost usage | flags-1.0.md | `grok usage --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-038 | `grok agent` modes are `stdio`, `headless`, `serve`, and `leader` | flags-1.0.md, SKILL.md | `grok agent --help` | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
+| C-039 | `share` and `workspace` still answer `grok <cmd> --help` and stay off the recipe list | flags-1.0.md | both commands print help; default `grok --help` omits them | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-035 | `--tools` / `--max-turns` / `--agents` are headless-only (user-guide); default `--help` omits that label | flags-1.0.md | user-guide 14-headless-mode.md; flags table notes help omission | `skills/grok-build/references/flags-1.0.md` | | | normal | OK | keep |
 | C-036 | AGY uses `~/.gemini/config/skills/grok-build` and `~/.gemini/antigravity-cli/skills/grok-build`; never `~/.agy/skills` | README, PUBLISH, ADR-0003 | installer destinations + FAKE_HOME smoke assertions | `install.sh` | `agy_dests` | | critical | OK | keep |
 
@@ -117,6 +120,12 @@
 ### v3.2 AGY follow-on
 
 - Native AGY destinations, smoke coverage, ADR-0003, and release metadata
+
+### v3.3 CLI 1.0.48
+
+- Fallback model `grok-4.7`; still available `grok-4.7-build-fast`, `grok-4.6`, `grok-4.5`
+- `--worktree` creates a git worktree on this binary, including under `-p`
+- `grok usage`, `grok worktree create`, and `grok agent` modes `headless` / `serve` / `leader`
 
 ## Follow-on plan
 

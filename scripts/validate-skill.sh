@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # validate-skill.sh
-# Contract-aware validator for the grok-build skill (v3.2 / CLI 1.0.13+).
+# Contract-aware validator for the grok-build skill (v3.3 / CLI 1.0.48).
 #
 # Usage: ./scripts/validate-skill.sh [path-to-SKILL.md]
 set -euo pipefail
@@ -70,6 +70,8 @@ REQUIRED_CONCEPTS=(
   "streaming-messages-json"
   "include-partial-messages"
   "grok doctor"
+  "grok-4.7"
+  "grok-4.7-build-fast"
   "grok-4.6"
   "grok-4.5"
   "restore-code"
@@ -81,6 +83,7 @@ REQUIRED_CONCEPTS=(
   "grok login"
   "device-auth"
   "json-schema"
+  "1.0.48"
 )
 
 for concept in "${REQUIRED_CONCEPTS[@]}"; do
@@ -91,21 +94,64 @@ for concept in "${REQUIRED_CONCEPTS[@]}"; do
 done
 
 # Entrypoint must carry the critical contract (not only references/)
-for concept in "streaming-messages-json" "include-partial-messages" "grok doctor" "grok-4.6" "grok-4.5" "restore-code"; do
+for concept in \
+  "streaming-messages-json" \
+  "include-partial-messages" \
+  "grok doctor" \
+  "grok-4.7" \
+  "grok-4.7-build-fast" \
+  "grok-4.6" \
+  "grok-4.5" \
+  "restore-code" \
+  "1.0.48" \
+  "creates a git worktree" \
+  '${MODEL:-grok-4.7}'
+do
   if ! grep -F -q -- "$concept" "$SKILL_FILE"; then
     echo "FAIL: SKILL.md entrypoint must mention: $concept"
     exit 1
   fi
 done
 
-if ! grep -E -q 'does not create a worktree' "$SKILL_FILE"; then
-  echo "FAIL: SKILL.md must document headless worktree caveat"
+# Needles are split so this script does not itself contain the retired contract strings.
+retired_worktree="does not create a ""worktree"
+retired_fallback='${MODEL:-grok-4.'"6}"
+retired_target="CLI 1.0.""13+"
+retired_verified="verified against live grok 1.0.""13"
+if grep -R -F -q -- "$retired_worktree" "$SKILL_FILE" ${REF_DIR:+"$REF_DIR"} 2>/dev/null; then
+  echo "FAIL: current contract still teaches the retired headless worktree sentence"
+  exit 1
+fi
+if grep -R -F -q -- "$retired_fallback" "$SKILL_FILE" ${REF_DIR:+"$REF_DIR"} 2>/dev/null; then
+  echo "FAIL: fallback must be grok-4.7"
+  exit 1
+fi
+if grep -F -q -- "$retired_target" "$SKILL_FILE" || grep -F -q -- "$retired_verified" "$SKILL_FILE"; then
+  echo "FAIL: entrypoint still names the previous CLI build as the verified target"
   exit 1
 fi
 
-# Target surface mention (1.0 family; "1.0.13+" matches CLI 1.0 / Grok Build CLI 1)
-if ! grep -Eiq '1\.0\.0|CLI 1\.0|Grok Build CLI 1' "$SKILL_FILE"; then
-  echo "FAIL: SKILL.md must target Grok Build CLI 1.0 family (1.0.13+)"
+# Hidden-but-live flags must stay cited as omitted from default --help
+for hidden in \
+  --memory-flush \
+  --background-wait-timeout \
+  --load \
+  --compaction-mode \
+  --compaction-detail \
+  --no-ask-user \
+  --no-wait-for-background \
+  --no-memory \
+  --experimental-memory \
+  --no-auto-update \
+  --yolo
+do
+  if ! search_corpus "$hidden"; then
+    echo "FAIL: hidden-but-live flag not cited: $hidden"
+    exit 1
+  fi
+done
+if ! search_corpus "omitted from default"; then
+  echo "FAIL: hidden flags must be cited as omitted from default --help"
   exit 1
 fi
 
@@ -151,7 +197,7 @@ fi
 
 # 8. FAIL primary fallback echo grok-build
 if grep -nE 'echo[[:space:]]+grok-build\b|\|\|[[:space:]]*echo[[:space:]]+grok-build\b' "$SKILL_FILE"; then
-  echo "FAIL: Primary model fallback must not be 'echo grok-build' (use grok-4.6)"
+  echo "FAIL: Primary model fallback must not be 'echo grok-build' (use grok-4.7)"
   exit 1
 fi
 if [[ -d "$REF_DIR" ]] && grep -R -nE 'echo[[:space:]]+grok-build\b' "$REF_DIR"; then
@@ -169,5 +215,5 @@ if [[ -d "$REF_DIR" ]]; then
   done
 fi
 
-echo "✓ Validation passed for $SKILL_FILE (skill 3.x / CLI 1.0 contract)"
+echo "✓ Validation passed for $SKILL_FILE (skill 3.x / CLI 1.0.48 contract)"
 echo "  (Optional: ./scripts/sync-check-cli.sh when grok is on PATH)"
